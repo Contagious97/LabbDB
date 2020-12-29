@@ -99,11 +99,14 @@ public class BooksPane extends VBox {
 
         // define columns
         TableColumn<Book, String> titleCol = new TableColumn<>("Title");
+        TableColumn<Book, String> authorCol = new TableColumn<>("Author");
         TableColumn<Book, String> isbnCol = new TableColumn<>("ISBN");
+        TableColumn<Book, String> ratingCol = new TableColumn<>("Rating");
+        TableColumn<Book, String> genreCol = new TableColumn<>("Genre");
         TableColumn<Book, Date> publishedCol = new TableColumn<>("Published");
-        booksTable.getColumns().addAll(titleCol, isbnCol, publishedCol);
+        booksTable.getColumns().addAll(titleCol, authorCol, isbnCol, ratingCol, genreCol, publishedCol);
         // give title column some extra space
-        titleCol.prefWidthProperty().bind(booksTable.widthProperty().multiply(0.5));
+        titleCol.prefWidthProperty().bind(booksTable.widthProperty().multiply(0.4));
 
         // define how to fill data for each cell, 
         // get values from Book properties

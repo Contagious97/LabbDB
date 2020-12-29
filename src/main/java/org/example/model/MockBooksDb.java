@@ -22,11 +22,11 @@ import java.util.List;
  */
 public class MockBooksDb implements BooksDbInterface {
 
-    private final List<Book> books;
     private Connection connection;
+    private final List<Book>books;
 
     public MockBooksDb(){
-        books = Arrays.asList(DATA);
+        this.books = new ArrayList<>();
     }
 
     @Override
@@ -35,10 +35,10 @@ public class MockBooksDb implements BooksDbInterface {
         try {
 
             connection = DriverManager.getConnection("jdbc:mysql://myplace.se:3306/" + database +"?UseClientEnc=UTF8");
-            System.out.println("GREAT SUCCESS");
+            System.out.println("Connected...");
 
         } catch (Exception e){
-
+            System.out.println("Could not connect to the database");
         }
         return true;
     }
@@ -46,7 +46,7 @@ public class MockBooksDb implements BooksDbInterface {
     @Override
     public void disconnect() throws IOException, SQLException {
         // mock implementation
-        connection.close();
+            connection.close();
     }
 
     @Override
@@ -77,12 +77,61 @@ public class MockBooksDb implements BooksDbInterface {
         return result;
     }
 
-    private static final Book[] DATA = {
-        new Book(1, "123456789", "Databases Illuminated", new Date(1990, 1, 1)),
-        new Book(2, "456789012", "The buried giant", new Date(2000, 1, 1)),
-        new Book(2, "567890123", "Never let me go", new Date(2000, 1, 1)),
-        new Book(2, "678901234", "The remains of the day", new Date(2000, 1, 1)),
-        new Book(2, "234567890", "Alias Grace", new Date(2000, 1, 1)),
-        new Book(3, "345678901", "The handmaids tale", new Date(2010, 1, 1))
-    };
+    @Override
+    public List<Book> searchBooksByAuthor(String searchAuthorName) throws IOException, SQLException {
+        return null;
+    }
+
+    @Override
+    public List<Book> searchBooksByISBN(String searchIsbn) throws IOException, SQLException {
+        return null;
+    }
+
+    @Override
+    public List<Book> searchBooksByRating(int searchRating) throws IOException, SQLException {
+        return null;
+    }
+
+    @Override
+    public List<Book> searchBooksByGenre(Genre searchGenre) throws IOException, SQLException {
+        return null;
+    }
+
+    @Override
+    public void addBook(Book bookToAdd) throws IOException, SQLException {
+        try {PreparedStatement addBookStatement = connection.prepareStatement(
+                "UPDATE books INSERT INTO books" + bookToAdd);
+            connection.setAutoCommit(false);
+            addBookStatement.executeUpdate();
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
+    }
+
+    @Override
+    public void removeBook(Book bookToRemove) throws IOException, SQLException {
+
+    }
+
+    @Override
+    public void modifyBook(Book bookToModify) throws IOException, SQLException {
+
+    }
+
+
+//    private static final Book[] DATA = {
+//        new Book(1, "123456789", "Databases Illuminated", new Date(1990, 1, 1)),
+//        new Book(2, "456789012", "The buried giant", new Date(2000, 1, 1)),
+//        new Book(2, "567890123", "Never let me go", new Date(2000, 1, 1)),
+//        new Book(2, "678901234", "The remains of the day", new Date(2000, 1, 1)),
+//        new Book(2, "234567890", "Alias Grace", new Date(2000, 1, 1)),
+//        new Book(3, "345678901", "The handmaids tale", new Date(2010, 1, 1))
+//    };
 }
