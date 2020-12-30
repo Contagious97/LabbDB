@@ -78,29 +78,83 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByAuthor(String searchAuthorName) throws IOException, SQLException {
-        return null;
+    public void searchBooksByAuthor(String searchAuthorName) throws IOException, SQLException {
+        try {PreparedStatement searchAuthorStatement = connection.prepareStatement(
+                "SELECT DISTINCT author FROM books WHERE name=" + searchAuthorName);
+            connection.setAutoCommit(false);
+            searchAuthorStatement.executeUpdate();
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
     }
 
     @Override
-    public List<Book> searchBooksByISBN(String searchIsbn) throws IOException, SQLException {
-        return null;
+    public void searchBooksByISBN(String searchIsbn) throws IOException, SQLException {
+        try {PreparedStatement searchIsbnStatement = connection.prepareStatement(
+                "SELECT * FROM books WHERE isbn=" + searchIsbn);
+
+            connection.setAutoCommit(false);
+            searchIsbnStatement.executeUpdate();
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
     }
 
     @Override
-    public List<Book> searchBooksByRating(int searchRating) throws IOException, SQLException {
-        return null;
+    public void searchBooksByRating(int searchRating) throws IOException, SQLException {
+        try {PreparedStatement searchIsbnStatement = connection.prepareStatement(
+                "SELECT * FROM books WHERE isbn=" + searchRating);
+
+            connection.setAutoCommit(false);
+            searchIsbnStatement.executeUpdate();
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
     }
 
     @Override
-    public List<Book> searchBooksByGenre(Genre searchGenre) throws IOException, SQLException {
-        return null;
+    public void searchBooksByGenre(Genre searchGenre) throws IOException, SQLException {
+        try {PreparedStatement searchGenreStatement = connection.prepareStatement(
+                "SELECT * FROM books WHERE genre=" + searchGenre);
+            connection.setAutoCommit(false);
+            searchGenreStatement.executeUpdate();
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
     }
 
     @Override
     public void addBook(Book bookToAdd) throws IOException, SQLException {
         try {PreparedStatement addBookStatement = connection.prepareStatement(
-                "UPDATE books INSERT INTO books" + bookToAdd);
+                "INSERT INTO books(bookID,title,isbn,author,genre,rating)" + "VALUES(" + bookToAdd.getBookId() + "" + bookToAdd.getTitle() + "" + bookToAdd.getIsbn());
             connection.setAutoCommit(false);
             addBookStatement.executeUpdate();
         } catch (SQLException e) {
@@ -117,12 +171,48 @@ public class MockBooksDb implements BooksDbInterface {
 
     @Override
     public void removeBook(Book bookToRemove) throws IOException, SQLException {
+        try {
+            PreparedStatement addBookStatement = connection.prepareStatement(
+                    "DELETE FROM books WHERE isbn =" + bookToRemove.getIsbn());
 
+            connection.setAutoCommit(false);
+            addBookStatement.executeUpdate();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u) {
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
     }
 
     @Override
-    public void modifyBook(Book bookToModify) throws IOException, SQLException {
+    public void modifyBook(Book bookToModify, Book modifiedBook) throws IOException, SQLException {
+        try {
+            PreparedStatement addBookStatement = connection.prepareStatement(
+                    "UPDATE books SET " + modifiedBook.getTitle()
+                            + "" + modifiedBook.getIsbn()
+                            + "" + modifiedBook.getGenre()
+                            + "" + modifiedBook.getRating()
+                            + "" + modifiedBook.getPublished()
+                            + "" + modifiedBook.getStoryLine()
+                            + "WHERE isbn=" + bookToModify.getIsbn() );
 
+            connection.setAutoCommit(false);
+            addBookStatement.executeUpdate();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u) {
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+        }
     }
 
 

@@ -1,9 +1,7 @@
 package org.example.view;
 
-import org.example.model.Genre;
-import org.example.model.SearchMode;
-import org.example.model.Book;
-import org.example.model.BooksDbInterface;
+import org.example.model.*;
+
 import java.util.List;
 
 import static javafx.scene.control.Alert.AlertType.*;
@@ -32,14 +30,14 @@ public class Controller {
                     case Title:
                         result = booksDb.searchBooksByTitle(searchFor);
                         break;
-                    case ISBN:
-                        result = booksDb.searchBooksByISBN(searchFor);
-                        break;
+//                    case ISBN:
+//                        result = booksDb.searchBooksByISBN(searchFor);
+//                        break;
                     case Author:
-                        result = booksDb.searchBooksByAuthor(searchFor);
+//                        result = booksDb.searchBooksByAuthor(Author);
                         break;
                     case Genre:
-                        result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
+//                        result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
                     default:
                 }
                 if (result == null || result.isEmpty()) {

@@ -157,6 +157,12 @@ public class BooksPane extends VBox {
         MenuItem updateItem = new MenuItem("Update");
         manageMenu.getItems().addAll(addItem, removeItem, updateItem);
 
+//        removeItem.setOnAction(event -> {
+//            if(se)
+//
+//        });
+
+
         menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu, searchMenu, manageMenu);
     }

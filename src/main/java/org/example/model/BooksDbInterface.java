@@ -25,19 +25,19 @@ public interface BooksDbInterface {
     
     public List<Book> searchBooksByTitle(String title) throws IOException, SQLException;
 
-    public List<Book> searchBooksByAuthor(String authorName) throws IOException, SQLException;
+    public void searchBooksByAuthor(String authorName) throws IOException, SQLException;
 
-    public List<Book> searchBooksByISBN(String isbn) throws IOException, SQLException;
+    public void searchBooksByISBN(String isbn) throws IOException, SQLException;
 
-    public List<Book> searchBooksByRating(int rating) throws IOException, SQLException;
+    public void searchBooksByRating(int rating) throws IOException, SQLException;
 
-    public List<Book> searchBooksByGenre(Genre genre) throws IOException, SQLException;
+    public void searchBooksByGenre(Genre genre) throws IOException, SQLException;
 
     public void addBook(Book book) throws IOException, SQLException;
 
     public void removeBook(Book book) throws IOException, SQLException;
 
-    public void modifyBook(Book book) throws IOException, SQLException;
+    public void modifyBook(Book book, Book modifiedBook) throws IOException, SQLException;
 
 
 
