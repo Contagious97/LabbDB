@@ -1,5 +1,6 @@
 package org.example.view;
 
+import org.example.model.Genre;
 import org.example.model.SearchMode;
 import org.example.model.Book;
 import org.example.model.BooksDbInterface;
@@ -32,11 +33,13 @@ public class Controller {
                         result = booksDb.searchBooksByTitle(searchFor);
                         break;
                     case ISBN:
-                        // ...
+                        result = booksDb.searchBooksByISBN(searchFor);
                         break;
                     case Author:
-                        // ...
+                        result = booksDb.searchBooksByAuthor(searchFor);
                         break;
+                    case Genre:
+                        result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
                     default:
                 }
                 if (result == null || result.isEmpty()) {
@@ -50,10 +53,7 @@ public class Controller {
                         "Enter a search string!", WARNING);
             }
         } catch (Exception e) {
-            booksView.showAlertAndWait("Database error.",ERROR);
+            booksView.showAlertAndWait("Database error.", ERROR);
         }
     }
-
-    // TODO:
-    // Add methods for all types of user interaction (e.g. via  menus).
 }
