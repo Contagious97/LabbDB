@@ -59,6 +59,10 @@ public class BooksPane extends VBox {
         booksInTable.clear();
         booksInTable.addAll(books);
     }
+
+    public void clearDisplay(){
+        booksInTable.clear();
+    }
     
     /**
      * Notify user on input error or exceptions.
@@ -75,7 +79,6 @@ public class BooksPane extends VBox {
     private void init(Controller controller) {
 
         booksInTable = FXCollections.observableArrayList();
-
         // init views and event handlers
         initBooksTable();
         initSearchView(controller);

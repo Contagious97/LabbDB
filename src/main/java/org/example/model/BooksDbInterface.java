@@ -1,6 +1,7 @@
 package org.example.model;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -22,6 +23,10 @@ public interface BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException;
     
     public void disconnect() throws IOException, SQLException;
+
+    public List<Book> getAllBooks() throws IOException, SQLException;
+
+    public List<Book> getBooksFromResultSet(ResultSet resultSet) throws IOException, SQLException;
     
     public List<Book> searchBooksByTitle(String title) throws IOException, SQLException;
 
@@ -38,6 +43,8 @@ public interface BooksDbInterface {
     public void removeBook(Book book) throws IOException, SQLException;
 
     public void modifyBook(Book book) throws IOException, SQLException;
+
+
 
 
 
