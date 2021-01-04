@@ -3,6 +3,8 @@ package org.example.view;
 import org.example.model.SearchMode;
 import org.example.model.Book;
 import org.example.model.MockBooksDb;
+
+import java.net.PortUnreachableException;
 import java.sql.Date;
 import java.util.List;
 import javafx.collections.FXCollections;
@@ -64,7 +66,7 @@ public class BooksPane extends VBox {
      * @param msg the message
      * @param type types: INFORMATION, WARNING et c.
      */
-    protected void showAlertAndWait(String msg, Alert.AlertType type) {
+    public static void showAlertAndWait(String msg, Alert.AlertType type) {
         // types: INFORMATION, WARNING et c.
         Alert alert = new Alert(type, msg);
         alert.showAndWait();
@@ -99,12 +101,11 @@ public class BooksPane extends VBox {
 
         // define columns
         TableColumn<Book, String> titleCol = new TableColumn<>("Title");
-        TableColumn<Book, String> authorCol = new TableColumn<>("Author");
         TableColumn<Book, String> isbnCol = new TableColumn<>("ISBN");
         TableColumn<Book, String> ratingCol = new TableColumn<>("Rating");
         TableColumn<Book, String> genreCol = new TableColumn<>("Genre");
-        TableColumn<Book, Date> publishedCol = new TableColumn<>("Published");
-        booksTable.getColumns().addAll(titleCol, authorCol, isbnCol, ratingCol, genreCol, publishedCol);
+        TableColumn<Book, Date> publishedCol = new TableColumn<>("PublishDate");
+        booksTable.getColumns().addAll(titleCol, isbnCol, ratingCol, genreCol, publishedCol);
         // give title column some extra space
         titleCol.prefWidthProperty().bind(booksTable.widthProperty().multiply(0.4));
 
@@ -112,7 +113,9 @@ public class BooksPane extends VBox {
         // get values from Book properties
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         isbnCol.setCellValueFactory(new PropertyValueFactory<>("isbn"));
-        publishedCol.setCellValueFactory(new PropertyValueFactory<>("published"));
+        publishedCol.setCellValueFactory(new PropertyValueFactory<>("publishDate"));
+        genreCol.setCellValueFactory(new PropertyValueFactory<>("genre"));
+        ratingCol.setCellValueFactory(new PropertyValueFactory<>("grade"));
         
         // associate the table view with the data
         booksTable.setItems(booksInTable);

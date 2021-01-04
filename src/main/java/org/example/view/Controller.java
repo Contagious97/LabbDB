@@ -1,5 +1,6 @@
 package org.example.view;
 
+import javafx.application.Platform;
 import org.example.model.Genre;
 import org.example.model.SearchMode;
 import org.example.model.Book;
@@ -25,35 +26,39 @@ public class Controller {
     }
 
     protected void onSearchSelected(String searchFor, SearchMode mode) {
-        try {
-            if (searchFor != null && searchFor.length() > 1) {
-                List<Book> result = null;
-                switch (mode) {
-                    case Title:
-                        result = booksDb.searchBooksByTitle(searchFor);
-                        break;
-                    case ISBN:
-                        result = booksDb.searchBooksByISBN(searchFor);
-                        break;
-                    case Author:
-                        result = booksDb.searchBooksByAuthor(searchFor);
-                        break;
-                    case Genre:
-                        result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
-                    default:
-                }
-                if (result == null || result.isEmpty()) {
-                    booksView.showAlertAndWait(
-                            "No results found.", INFORMATION);
+        new Thread(()->{
+            try {
+                if (searchFor != null && searchFor.length() > 1) {
+                    List<Book> result = null;
+                    switch (mode) {
+                        case Title:
+                            result = booksDb.searchBooksByTitle(searchFor);
+                            break;
+                        case ISBN:
+                            result = booksDb.searchBooksByISBN(searchFor);
+                            break;
+                        case Author:
+                            result = booksDb.searchBooksByAuthor(searchFor);
+                            break;
+                        case Genre:
+                            result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
+                        default:
+                    }
+                    if (result == null || result.isEmpty()) {
+                        Platform.runLater(()-> BooksPane.showAlertAndWait(
+                                "No results found.", INFORMATION));
+                    } else {
+                        booksView.displayBooks(result);
+                    }
                 } else {
-                    booksView.displayBooks(result);
+                    Platform.runLater(()-> BooksPane.showAlertAndWait(
+                            "Enter a search string!", WARNING));
                 }
-            } else {
-                booksView.showAlertAndWait(
-                        "Enter a search string!", WARNING);
+            } catch (Exception e) {
+                Platform.runLater(()-> BooksPane.showAlertAndWait("Database error.", ERROR));
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            booksView.showAlertAndWait("Database error.", ERROR);
-        }
+        }).start();
+
     }
 }

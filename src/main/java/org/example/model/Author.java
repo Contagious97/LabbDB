@@ -4,25 +4,25 @@ import java.time.LocalDate;
 
 public class Author {
     private final String name;
-    private final String ssn;
+    private final int age;
 
-    public Author(String name, String ssn) {
+    public Author(String name, int age) {
         this.name = name;
-        this.ssn = ssn;
+        this.age = age;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getSsn() {
-        return ssn;
+    public int getSsn() {
+        return age;
     }
 
     @Override
     public String toString() {
         return "Author{" +
                 "name='" + name + '\'' +
-                ", ssn='" + ssn + '\'';
+                ", age='" + age + '\'';
     }
 }

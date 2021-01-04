@@ -20,6 +20,12 @@ public class BooksDbClientMain extends Application {
         // Don't forget to connect to the db, somewhere...
 
         BooksPane root = new BooksPane(booksDb);
+        try {
+            booksDb.connect("library");
+            System.out.println("Connected to database");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
         Scene scene = new Scene(root, 800, 600);
 

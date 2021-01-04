@@ -32,21 +32,17 @@ public class MockBooksDb implements BooksDbInterface {
     @Override
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
-        try {
 
-            connection = DriverManager.getConnection("jdbc:mysql://myplace.se:3306/" + database +"?UseClientEnc=UTF8");
-            System.out.println("Connected...");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
+        System.out.println("Connected...");
 
-        } catch (Exception e){
-            System.out.println("Could not connect to the database");
-        }
         return true;
     }
 
     @Override
     public void disconnect() throws IOException, SQLException {
         // mock implementation
-            connection.close();
+        connection.close();
     }
 
     @Override
@@ -57,23 +53,39 @@ public class MockBooksDb implements BooksDbInterface {
         // the search string via a query with to a database.
 
         Statement statement = connection.createStatement();
-        String sql = "SELECT * FROM t_employee";
-        ResultSet n = statement.executeQuery(sql);
+        String sql1 = "use library";
+        String sql = "SELECT * FROM t_book " +
+                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                "WHERE UPPER(t_book.title) LIKE '%" + searchTitle.toUpperCase()+ "%'";
+        statement.execute(sql);
+        ResultSet n = statement.getResultSet();
+        List<Book> result = new ArrayList<>();
 
         while (n.next()){
-            int eno = n.getInt("eno");
-            String name = n.getString("name");
-            float salary = n.getFloat("salary");
-            System.out.println(eno + "\n" + name + "\n" + salary);
+            Book bookToAdd;
+            String isbn = n.getString("isbn");
+            String title = n.getString("title");
+            Date date = n.getDate("publishDate");
+            int grade = n.getInt("grade");
+            String genre = n.getString("genre");
+            System.out.println(isbn + "\n" + title + "\n" + date);
+            bookToAdd = new Book(title,isbn,date, genre, grade);
+            if (!result.contains(bookToAdd)){
+                result.add(bookToAdd);
+            }
+
+            int authorID = n.getInt("authorID");
+            try {
+                if (authorID != 0){
+                    bookToAdd.getAuthors().add(new Author(n.getString("name"),authorID));
+                }
+            } catch (Exception e){
+                System.out.println("Error adding author");
+            }
+
         }
 
-        List<Book> result = new ArrayList<>();
-        searchTitle = searchTitle.toLowerCase();
-        for (Book book : books) {
-            if (book.getTitle().toLowerCase().contains(searchTitle)) {
-                result.add(book);
-            }
-        }
         return result;
     }
 
