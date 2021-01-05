@@ -4,7 +4,8 @@ package org.example.model;
  * Different types of genres
  */
 public enum Genre {
-    DRAMA(0),ROMANCE(1),CRIME(2),HORROR(3),COMEDY(4);
+    Drama(0),Romance(1),Crime(2),Horror(3),Comedy(4),Fantasy(5),
+    Adventure(6),Dystopian(7),Mystery(8),Thriller(9),Cooking(10);
 
     /**
      * gets the genre represented as a value
@@ -22,4 +23,5 @@ public enum Genre {
     Genre(int value){
         this.value = value;
     }
+
 }

@@ -33,7 +33,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
         System.out.println("Connected...");
 
         return true;

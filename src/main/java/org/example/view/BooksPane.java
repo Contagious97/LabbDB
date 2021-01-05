@@ -1,14 +1,20 @@
 package org.example.view;
 
+import javafx.stage.Stage;
+import org.example.model.BooksDbInterface;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.example.model.SearchMode;
 import org.example.model.Book;
 import org.example.model.MockBooksDb;
 
+import java.io.IOException;
 import java.net.PortUnreachableException;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -30,6 +36,7 @@ public class BooksPane extends VBox {
     private ComboBox<SearchMode> searchModeBox;
     private TextField searchField;
     private Button searchButton;
+    private BooksDbInterface dbInterface;
 
     private MenuBar menuBar;
 
@@ -71,7 +78,7 @@ public class BooksPane extends VBox {
         // init views and event handlers
         initBooksTable();
         initSearchView(controller);
-        initMenus();
+        initMenus(controller);
 
         FlowPane bottomPane = new FlowPane();
         bottomPane.setHgap(10);
@@ -132,7 +139,7 @@ public class BooksPane extends VBox {
         });
     }
 
-    private void initMenus() {
+    private void initMenus(Controller controller) {
 
         Menu fileMenu = new Menu("File");
         MenuItem exitItem = new MenuItem("Exit");
@@ -140,29 +147,34 @@ public class BooksPane extends VBox {
         MenuItem disconnectItem = new MenuItem("Disconnect");
         fileMenu.getItems().addAll(exitItem, connectItem, disconnectItem);
 
-        Menu searchMenu = new Menu("Search");
-        MenuItem titleItem = new MenuItem("Title");
-        MenuItem isbnItem = new MenuItem("ISBN");
-        MenuItem authorItem = new MenuItem("Author");
-        searchMenu.getItems().addAll(titleItem, isbnItem, authorItem);
-
         Menu manageMenu = new Menu("Manage");
         MenuItem addItem = new MenuItem("Add");
-        addItem.setOnAction(e->{
-//            Dialog<Book> bookDialog = new Dialog<>();
-//            Button button = new Button("Cloc");
-//            bookDialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-//            bookDialog.show();
-            AddBookDialog dialog = new AddBookDialog();
-//
+
+
+        addItem.setOnAction(t -> {
+            BooksDialog dialog = new BooksDialog(dbInterface);
+            Optional<Book> result = dialog.showAndWait();
+            result.ifPresent(book -> {
+                    System.out.println("Does it work");
+                try {
+                    controller.onAddBook(book);
+                    booksInTable.add(book);
+                } catch (SQLException | IOException throwables) {
+                    throwables.printStackTrace();
+                }
+            });
         });
+
         MenuItem removeItem = new MenuItem("Remove");
         MenuItem updateItem = new MenuItem("Update");
         manageMenu.getItems().addAll(addItem, removeItem, updateItem);
 
         menuBar = new MenuBar();
-        menuBar.getMenus().addAll(fileMenu, searchMenu, manageMenu);
+        menuBar.getMenus().addAll(fileMenu, manageMenu);
     }
 
-
+//    public void handleCloseButtonAction(ActionEvent event) {
+//        Stage stage = (Stage) this.getScene().getWindow();
+//        stage.close();
+//    }
 }
