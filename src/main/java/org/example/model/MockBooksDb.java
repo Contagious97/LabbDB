@@ -33,7 +33,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
         System.out.println("Connected...");
 
         return true;
@@ -90,9 +90,46 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByAuthor(String searchAuthorName) throws IOException, SQLException {
-        return null;
-    }
+    public List<Book> searchBooksByAuthor(String searchAuthorName)
+        throws IOException, SQLException  {
+            // mock implementation
+            // NB! Your implementation should select the books matching
+            // the search string via a query with to a database.
+
+            Statement statement = connection.createStatement();
+            String sql1 = "use library";
+            String sql = "SELECT * FROM t_book " +
+                    "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                    "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                    "WHERE UPPER(t_book.title) LIKE '%" + searchAuthorName+ "%'";
+            statement.execute(sql);
+            ResultSet n = statement.getResultSet();
+            List<Book> result = new ArrayList<>();
+
+            while (n.next()){
+                Book bookToAdd;
+                String isbn = n.getString("isbn");
+                String title = n.getString("title");
+                Date date = n.getDate("publishDate");
+                int grade = n.getInt("grade");
+                String genre = n.getString("genre");
+                System.out.println(isbn + "\n" + title + "\n" + date);
+                bookToAdd = new Book(title,isbn,date, genre, grade);
+                if (!result.contains(bookToAdd)){
+                    result.add(bookToAdd);
+                }
+
+                int authorID = n.getInt("authorID");
+                try {
+                    if (authorID != 0){
+                        bookToAdd.getAuthors().add(new Author(n.getString("name"),authorID));
+                    }
+                } catch (Exception e){
+                    System.out.println("Error adding author");
+                }
+            }
+            return result;
+        }
 
     @Override
     public List<Book> searchBooksByISBN(String searchIsbn) throws IOException, SQLException {
