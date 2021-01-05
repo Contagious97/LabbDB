@@ -41,7 +41,7 @@ public class Controller {
                             result = booksDb.searchBooksByAuthor(searchFor);
                             break;
                         case Genre:
-                            result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
+                            result = booksDb.searchBooksByGenre(searchFor);
                         default:
                     }
                     if (result == null || result.isEmpty()) {
@@ -61,6 +61,16 @@ public class Controller {
             }
         }).start();
 
+    }
+
+    protected void onAddBook(){
+        new Thread(()->{
+           try {
+
+           } catch (Exception e){
+
+           }
+        });
     }
 
     protected void onGetAllBooks(){

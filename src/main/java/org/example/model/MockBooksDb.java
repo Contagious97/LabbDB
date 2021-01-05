@@ -131,7 +131,7 @@ public class MockBooksDb implements BooksDbInterface {
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
-                "WHERE t_book.grade = " + searchRating;
+                "WHERE t_book.grade =" + searchRating;
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
@@ -141,7 +141,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByGenre(Genre searchGenre) throws IOException, SQLException {
+    public List<Book> searchBooksByGenre(String searchGenre) throws IOException, SQLException {
         Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +

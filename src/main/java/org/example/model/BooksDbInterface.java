@@ -36,7 +36,7 @@ public interface BooksDbInterface {
 
     public List<Book> searchBooksByRating(int rating) throws IOException, SQLException;
 
-    public List<Book> searchBooksByGenre(Genre genre) throws IOException, SQLException;
+    public List<Book> searchBooksByGenre(String genre) throws IOException, SQLException;
 
     public void addBook(Book book) throws IOException, SQLException;
 
