@@ -32,7 +32,7 @@ public class Controller {
     protected void onSearchSelected(String searchFor, SearchMode mode) {
         new Thread(()->{
             try {
-                if (searchFor != null && searchFor.length() > 1) {
+                if (searchFor != null && searchFor.length() > 0) {
                     List<Book> result = null;
                     switch (mode) {
                         case Title:
@@ -45,12 +45,13 @@ public class Controller {
                             result = booksDb.searchBooksByAuthor(searchFor);
                             break;
                         case Genre:
-                            result = booksDb.searchBooksByGenre(Genre.valueOf(searchFor));
+                            result = booksDb.searchBooksByGenre(searchFor);
                         default:
                     }
                     if (result == null || result.isEmpty()) {
                         Platform.runLater(()-> BooksPane.showAlertAndWait(
                                 "No results found.", INFORMATION));
+                        booksView.clearDisplay();
                     } else {
                         booksView.displayBooks(result);
                     }
@@ -65,14 +66,26 @@ public class Controller {
         }).start();
 
     }
-    protected void onAddBook(Book book)throws SQLException,IOException{
-        new Thread(()-> {
 
+    protected void onAddBook(){
+        new Thread(()->{
+           try {
+
+           } catch (Exception e){
+
+           }
+        });
+    }
+
+    protected void onGetAllBooks(){
+        new Thread(()->{
             try {
-                booksDb.addBook(book);
-            } catch (IOException | SQLException e) {
+                booksView.displayBooks(booksDb.getAllBooks());
+                System.out.println("hello");
+            } catch (Exception e){
+                System.out.println("Error");
                 e.printStackTrace();
             }
-        });
+        }).start();
     }
 }

@@ -2,6 +2,8 @@ package org.example.view;
 
 import javafx.stage.Stage;
 import org.example.model.BooksDbInterface;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import org.example.model.SearchMode;
 import org.example.model.Book;
 import org.example.model.MockBooksDb;
@@ -18,20 +20,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 
 /**
  * The main pane for the view, extending VBox and including the menus. An
@@ -66,6 +55,10 @@ public class BooksPane extends VBox {
         booksInTable.clear();
         booksInTable.addAll(books);
     }
+
+    public void clearDisplay(){
+        booksInTable.clear();
+    }
     
     /**
      * Notify user on input error or exceptions.
@@ -82,7 +75,6 @@ public class BooksPane extends VBox {
     private void init(Controller controller) {
 
         booksInTable = FXCollections.observableArrayList();
-
         // init views and event handlers
         initBooksTable();
         initSearchView(controller);
