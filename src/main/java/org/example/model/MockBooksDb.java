@@ -150,8 +150,6 @@ public class MockBooksDb implements BooksDbInterface {
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
-
-
         return getBooksFromResultSet(resultSet);
     }
     @Override
@@ -169,7 +167,12 @@ public class MockBooksDb implements BooksDbInterface {
     public void addBook(Book bookToAdd) throws IOException, SQLException {
         try {
             PreparedStatement addBookStatement = connection.prepareStatement(
-                "UPDATE books INSERT INTO books" + bookToAdd);
+                "UPDATE books INSERT INTO t_book(isbn, title, publishDate, genre, grade)" +
+                        "VALUES(" + "'" + bookToAdd.getIsbn()+ "'," +
+                        "'" + bookToAdd.getTitle()+ "'," +
+                        "'" + bookToAdd.getPublishDate()+ "'," +
+                        "'" + bookToAdd.getGenre()+ "'," +
+                        "'" + bookToAdd.getGrade()+ "'");
             connection.setAutoCommit(false);
             addBookStatement.executeUpdate();
         } catch (SQLException e) {
