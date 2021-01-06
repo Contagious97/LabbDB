@@ -1,10 +1,7 @@
 package org.example.view;
 
 import javafx.application.Platform;
-import org.example.model.Genre;
-import org.example.model.SearchMode;
-import org.example.model.Book;
-import org.example.model.BooksDbInterface;
+import org.example.model.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -70,6 +67,25 @@ public class Controller {
 
             try {
                 booksDb.addBook(book);
+            } catch (IOException | SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+    protected void onAddAuthor(Author author) throws SQLException,IOException{
+        new Thread(()-> {
+            try {
+                booksDb.addAuthor(author);
+            } catch (IOException | SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    protected void onDeleteAuthor(Author author) throws SQLException,IOException{
+        new Thread(()-> {
+            try {
+                booksDb.deleteAuthor(author);
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
