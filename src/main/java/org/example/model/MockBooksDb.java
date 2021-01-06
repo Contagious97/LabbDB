@@ -135,8 +135,6 @@ public class MockBooksDb implements BooksDbInterface {
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
-
-
         return getBooksFromResultSet(resultSet);
     }
 

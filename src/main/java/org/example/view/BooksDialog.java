@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 public class BooksDialog extends Dialog<Book> {
 
@@ -49,7 +51,6 @@ public class BooksDialog extends Dialog<Book> {
         HBox hBox = new HBox();
         hBox.setSpacing(5);
 
-
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -58,6 +59,14 @@ public class BooksDialog extends Dialog<Book> {
         TextField title = new TextField();
         title.setPromptText("Title");
         TextField isbn = new TextField();
+
+        Pattern pattern = Pattern.compile("[0-9]{0,13}");
+        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
+            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
+        });
+
+        isbn.setTextFormatter(formatter);
+
         isbn.setPromptText("ISBN");
 
 
@@ -72,7 +81,6 @@ public class BooksDialog extends Dialog<Book> {
                 }
             });
         });
-
 
         grid.add(new Label("Title:"), 0, 0);
         grid.add(title, 1, 0);
@@ -125,7 +133,6 @@ public class BooksDialog extends Dialog<Book> {
         title.textProperty().addListener((observable, oldValue, newValue) -> {
             confirmButton.setDisable(newValue.trim().isEmpty());
         });
-
 
         this.getDialogPane().setContent(grid);
 
