@@ -210,6 +210,16 @@ public class MockBooksDb implements BooksDbInterface {
 
     }
 
+    @Override
+    public void addAuthor(Author author) throws IOException, SQLException {
+
+    }
+
+    @Override
+    public void deleteAuthor(Author author) throws IOException, SQLException {
+
+    }
+
 
 //    private static final Book[] DATA = {
 //        new Book(1, "123456789", "Databases Illuminated", new Date(1990, 1, 1)),

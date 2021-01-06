@@ -44,6 +44,10 @@ public interface BooksDbInterface {
 
     public void modifyBook(Book book) throws IOException, SQLException;
 
+    public void addAuthor(Author author) throws IOException,SQLException;
+
+    public void deleteAuthor(Author author) throws IOException,SQLException;
+
 
 
 
