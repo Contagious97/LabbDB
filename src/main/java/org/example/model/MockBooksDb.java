@@ -135,8 +135,6 @@ public class MockBooksDb implements BooksDbInterface {
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
-
-
         return getBooksFromResultSet(resultSet);
     }
 
@@ -207,6 +205,16 @@ public class MockBooksDb implements BooksDbInterface {
 
     @Override
     public void modifyBook(Book bookToModify) throws IOException, SQLException {
+
+    }
+
+    @Override
+    public void addAuthor(Author author) throws IOException, SQLException {
+
+    }
+
+    @Override
+    public void deleteAuthor(Author author) throws IOException, SQLException {
 
     }
 
