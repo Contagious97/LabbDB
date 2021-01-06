@@ -61,17 +61,16 @@ public class Controller {
                 e.printStackTrace();
             }
         }).start();
-
     }
 
     protected void onAddBook(Book book) throws SQLException,IOException{
         new Thread(()->{
            try {
                 booksDb.addBook(book);
-           } catch (Exception e){
-
+           } catch (IOException | SQLException e) {
+               e.printStackTrace();
            }
-        });
+        }).start();
     }
 
     protected void onGetAllBooks() throws SQLException,IOException{
@@ -92,7 +91,7 @@ public class Controller {
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
-        });
+        }).start();
     }
 
     protected void onDeleteAuthor(Author author) throws SQLException,IOException{
@@ -102,6 +101,6 @@ public class Controller {
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
-        });
+        }).start();
     }
 }
