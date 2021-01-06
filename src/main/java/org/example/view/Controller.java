@@ -61,29 +61,35 @@ public class Controller {
                 e.printStackTrace();
             }
         }).start();
+
     }
 
-    protected void onAddBook(Book book) throws SQLException,IOException{
+    protected void onAddBook(Book book){
         new Thread(()->{
            try {
-                booksDb.addBook(book);
-           } catch (IOException | SQLException e) {
-               e.printStackTrace();
+               if (!isValidIsbn(book)){
+                   Platform.runLater(()-> BooksPane.showAlertAndWait("Invalid ISBN. Try again",WARNING));
+               } else if(!isValidTitle(book)) {
+                   Platform.runLater(()-> BooksPane.showAlertAndWait("Invalid title. Try again",WARNING));
+               }
+               else booksDb.addBook(book);
+           } catch (Exception e){
+                e.printStackTrace();
            }
         }).start();
     }
 
-    protected void onGetAllBooks() throws SQLException,IOException{
+    protected void onGetAllBooks(){
         new Thread(()->{
             try {
                 booksView.displayBooks(booksDb.getAllBooks());
-                System.out.println("hello");
             } catch (Exception e){
                 System.out.println("Error");
                 e.printStackTrace();
             }
         }).start();
     }
+
     protected void onAddAuthor(Author author) throws SQLException,IOException{
         new Thread(()-> {
             try {
@@ -102,5 +108,23 @@ public class Controller {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    private boolean isValidTitle(Book bookToCheck){
+        if(bookToCheck.getTitle().length() > 30 || book.getTitle().length() < 1){
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidIsbn(Book bookToCheck){
+        String isbn = bookToCheck.getIsbn();
+        isbn = isbn.replace("-","");
+        boolean matches;
+        matches = isbn.matches("[0-9]{13}");
+        if (!matches){
+            return false;
+        }
+        return true;
     }
 }
