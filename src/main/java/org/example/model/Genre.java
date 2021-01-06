@@ -5,7 +5,7 @@ package org.example.model;
  */
 public enum Genre {
     Drama(0),Romance(1),Crime(2),Horror(3),Comedy(4),Fantasy(5),
-    Adventure(6),Dystopian(7),Mystery(8),Thriller(9),Cooking(10);
+    Adventure(6),Dystopian(7),Mystery(8),Thriller(9),Cooking(10), Educational(11);
 
     /**
      * gets the genre represented as a value

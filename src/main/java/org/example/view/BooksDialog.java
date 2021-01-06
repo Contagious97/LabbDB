@@ -1,21 +1,23 @@
 package org.example.view;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.util.Pair;
 import org.example.model.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BooksDialog extends Dialog<Book> {
 
@@ -58,8 +60,8 @@ public class BooksDialog extends Dialog<Book> {
 
         grid.add(new Label("Title:"), 0, 0);
         grid.add(title, 1, 0);
-        grid.add(new Label("Author:"), 0, 1);
-        grid.add(authors, 1, 1);
+        //grid.add(new Label("Author:"), 0, 1);
+        //grid.add(authors, 1, 1);
         grid.add(new Label("ISBN:"), 0, 2);
         grid.add(isbn, 1, 2);
 
@@ -104,10 +106,28 @@ public class BooksDialog extends Dialog<Book> {
         Node confirmButton = this.getDialogPane().lookupButton(confirmButtonType);
         confirmButton.setDisable(true);
 
-// Do some validation (using the Java 8 lambda syntax).
-        title.textProperty().addListener((observable, oldValue, newValue) -> {
-            confirmButton.setDisable(newValue.trim().isEmpty());
+        confirmButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (true){
+                    
+                }
+            }
         });
+// Do some validation (using the Java 8 lambda syntax).
+//        if (!(title.getText().trim().isEmpty() || isbn.getText().trim().isEmpty() || genreList.getValue() == null)){
+//            confirmButton.setDisable(false);
+//        }
+//        AtomicBoolean isbnIsEmpty = new AtomicBoolean(true);
+//        isbn.textProperty().addListener((observable, oldValue, newValue) ->{
+//            if (newValue.trim().isEmpty()){
+//                isbnIsEmpty.set(false);
+//            }
+//        });
+//
+//        title.textProperty().addListener((observable, oldValue, newValue) -> {
+//            confirmButton.setDisable(newValue.trim().isEmpty());
+//        });
 
         //dialog.getDialogPane().setContent(grid);
 
@@ -120,7 +140,7 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-//                return new Pair<String, String>(title.getText(), password.getText());
+                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(),(int)ratingsList.getValue());
             }
             return null;
         });
