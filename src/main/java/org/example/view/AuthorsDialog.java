@@ -57,9 +57,9 @@ public class AuthorsDialog extends Dialog<Author> {
 
 
         Button addAuthorButton = new Button("Add");
-        addAuthorButton.
+//        addAuthorButton.
 
-        Button deleteAuthorButton = new Button("Delete");
+         Button deleteAuthorButton = new Button("Delete");
 
         HBox group = new HBox();
 
