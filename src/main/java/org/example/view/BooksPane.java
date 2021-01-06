@@ -155,13 +155,10 @@ public class BooksPane extends VBox {
             BooksDialog dialog = new BooksDialog(dbInterface);
             Optional<Book> result = dialog.showAndWait();
             result.ifPresent(book -> {
-                    System.out.println("Does it work");
-                try {
-                    controller.onAddBook(book);
-                    booksInTable.add(book);
-                } catch (SQLException | IOException throwables) {
-                    throwables.printStackTrace();
-                }
+                System.out.println("Does it work");
+                System.out.println(book.getTitle());
+                controller.onAddBook(book);
+                controller.onGetAllBooks();
             });
         });
 

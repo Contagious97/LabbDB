@@ -22,7 +22,7 @@ public class Book implements Comparable<Book>{
     // Add authors, and corresponding methods, to your implementation 
     // as well, i.e. "private ArrayList<Author> authors;"
 
-    public Book(int bookId, String title, String isbn, Date publishDate, String genre, String storyLine, int grade) {
+    public Book(String title, String isbn, Date publishDate, String genre, String storyLine, int grade) {
         this.title = title;
         this.isbn = isbn;
         this.publishDate = publishDate;
@@ -34,7 +34,7 @@ public class Book implements Comparable<Book>{
     }
 
     public Book(String title, String isbn, Date published, String genre, int grade) {
-        this(-1, title, isbn, published, genre, "this is a book",grade);
+        this(title, isbn, published, genre, "this is a book",grade);
     }
     
     public String getTitle() { return title; }

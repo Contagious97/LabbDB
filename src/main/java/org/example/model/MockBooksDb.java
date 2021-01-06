@@ -33,7 +33,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
         System.out.println("Connected...");
 
         return true;
@@ -54,8 +54,8 @@ public class MockBooksDb implements BooksDbInterface {
 
         Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE UPPER(t_book.title) LIKE '%" + searchTitle.toUpperCase()+ "%'";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
@@ -75,8 +75,8 @@ public class MockBooksDb implements BooksDbInterface {
             Date date = resultSet.getDate("publishDate");
             int grade = resultSet.getInt("grade");
             String genre = resultSet.getString("genre");
-            System.out.println(isbn + "\n" + title + "\n" + date);
             bookToAdd = new Book(title,isbn,date, genre, grade);
+            System.out.println(bookToAdd.getTitle() + bookToAdd.getIsbn());
             if (!result.contains(bookToAdd)){
                 result.add(bookToAdd);
             }
@@ -155,7 +155,9 @@ public class MockBooksDb implements BooksDbInterface {
     @Override
     public List<Book> getAllBooks() throws IOException, SQLException{
         Statement statement = connection.createStatement();
-        String sql = "SELECT * FROM t_book";
+        String sql = "SELECT * FROM t_book " +
+                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID ";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
@@ -167,14 +169,17 @@ public class MockBooksDb implements BooksDbInterface {
     public void addBook(Book bookToAdd) throws IOException, SQLException {
         try {
             PreparedStatement addBookStatement = connection.prepareStatement(
-                "UPDATE books INSERT INTO t_book(isbn, title, publishDate, genre, grade)" +
-                        "VALUES(" + "'" + bookToAdd.getIsbn()+ "'," +
-                        "'" + bookToAdd.getTitle()+ "'," +
-                        "'" + bookToAdd.getPublishDate()+ "'," +
-                        "'" + bookToAdd.getGenre()+ "'," +
-                        "'" + bookToAdd.getGrade()+ "'");
+                    "INSERT INTO t_book(isbn, title, publishDate, genre, grade) " +
+                            "VALUES (" +
+                            "'"+bookToAdd.getIsbn()+"'," +
+                            "'"+bookToAdd.getTitle()+"'," +
+                            "'"+bookToAdd.getPublishDate()+"'," +
+                            "'"+bookToAdd.getGenre()+"'," +
+                            "'"+bookToAdd.getGrade()+"'" +
+                            ")");
             connection.setAutoCommit(false);
             addBookStatement.executeUpdate();
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             if(connection!= null){
                 try {
@@ -184,6 +189,7 @@ public class MockBooksDb implements BooksDbInterface {
                     System.out.println("Something went wrong when rolling back");
                 }
             }
+            e.printStackTrace();
         }
     }
 
