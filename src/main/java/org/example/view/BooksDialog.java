@@ -143,8 +143,7 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-//                return new Pair<String, String>(title.getText(), password.getText());
-            }
+                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(),(int)ratingsList.getValue());            }
             return null;
         });
     }
