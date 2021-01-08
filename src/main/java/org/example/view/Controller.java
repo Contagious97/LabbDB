@@ -6,6 +6,7 @@ import org.example.model.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static javafx.scene.control.Alert.AlertType.*;
 
@@ -19,7 +20,6 @@ public class Controller {
 
     private final BooksPane booksView; // view
     private final BooksDbInterface booksDb; // model
-    private Book book;
 
     public Controller(BooksDbInterface booksDb, BooksPane booksView) {
         this.booksDb = booksDb;
@@ -43,6 +43,10 @@ public class Controller {
                             break;
                         case Genre:
                             result = booksDb.searchBooksByGenre(searchFor);
+                            break;
+                        case Rating:
+                            result = booksDb.searchBooksByRating(Integer.parseInt(searchFor));
+                            break;
                         default:
                     }
                     if (result == null || result.isEmpty()) {
@@ -64,18 +68,32 @@ public class Controller {
 
     }
 
-    protected void onAddBook(Book book){
+    protected void onAddBook(Book bookToAdd){
+        System.out.println(bookToAdd);
         new Thread(()->{
            try {
-               if (!isValidIsbn(book)){
+               if (!isValidIsbn(bookToAdd)){
                    Platform.runLater(()-> BooksPane.showAlertAndWait("Invalid ISBN. Try again",WARNING));
-               } else if(!isValidTitle(book)) {
+               } else if(!isValidTitle(bookToAdd)) {
                    Platform.runLater(()-> BooksPane.showAlertAndWait("Invalid title. Try again",WARNING));
                }
-               else booksDb.addBook(book);
+               else{
+                    booksDb.addBook(bookToAdd);
+               }
+
            } catch (Exception e){
                 e.printStackTrace();
            }
+        }).start();
+    }
+
+    protected void onRemoveBook(Book bookToRemove){
+        new Thread(()-> {
+            try {
+                booksDb.removeBook(bookToRemove);
+            } catch (IOException | SQLException e) {
+                e.printStackTrace();
+            }
         }).start();
     }
 
@@ -90,20 +108,32 @@ public class Controller {
         }).start();
     }
 
-    protected void onAddAuthor(Author author) throws SQLException,IOException{
-        new Thread(()-> {
+    protected void onGetAllAuthors(){
+        new Thread(()->{
             try {
-                booksDb.addAuthor(author);
+                booksView.displayBooks(booksDb.getAllBooks());
+            } catch (Exception e){
+                System.out.println("Error");
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    protected void onAddAuthor(Author authorToAdd) throws SQLException,IOException{
+        new Thread(()->{
+            try {
+                System.out.println(authorToAdd);
+                booksDb.addAuthor(authorToAdd);
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
-    protected void onDeleteAuthor(Author author) throws SQLException,IOException{
+    protected void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
         new Thread(()-> {
             try {
-                booksDb.deleteAuthor(author);
+                booksDb.deleteAuthor(authorToDelete);
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
@@ -111,7 +141,7 @@ public class Controller {
     }
 
     private boolean isValidTitle(Book bookToCheck){
-        if(bookToCheck.getTitle().length() > 30 || book.getTitle().length() < 1){
+        if(bookToCheck.getTitle().length() > 30 || bookToCheck.getTitle().length() < 1){
             return false;
         }
         return true;

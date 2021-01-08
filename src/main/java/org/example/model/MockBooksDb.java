@@ -6,8 +6,12 @@
 package org.example.model;
 
 
+import javafx.scene.control.DatePicker;
+
 import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,17 +27,15 @@ import java.util.List;
 public class MockBooksDb implements BooksDbInterface {
 
     private Connection connection;
-    private final List<Book>books;
 
     public MockBooksDb(){
-        this.books = new ArrayList<>();
     }
 
     @Override
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
         System.out.println("Connected...");
 
         return true;
@@ -76,21 +78,22 @@ public class MockBooksDb implements BooksDbInterface {
             int grade = resultSet.getInt("grade");
             String genre = resultSet.getString("genre");
             bookToAdd = new Book(title,isbn,date, genre, grade);
-            System.out.println(bookToAdd.getTitle() + bookToAdd.getIsbn());
             if (!result.contains(bookToAdd)){
                 result.add(bookToAdd);
             }
+//            resultSet.getDate("birthday").toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+//            int authorID = resultSet.getInt("authorID");
 
-            int authorID = resultSet.getInt("authorID");
             try {
-                if (authorID != 0){
-                    bookToAdd.getAuthors().add(new Author(resultSet.getString("name"),authorID));
-                }
+//                if (authorID != 0){
+                    bookToAdd.getAuthors().add(new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),resultSet.getString("lastName"),null));
+//                }
             } catch (Exception e){
                 System.out.println("Error adding author");
             }
 
         }
+        resultSet.close();
         return result;
     }
 
@@ -119,7 +122,6 @@ public class MockBooksDb implements BooksDbInterface {
                 "WHERE t_book.isbn LIKE '%" + searchIsbn + "%'";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
-
 
 
         return getBooksFromResultSet(resultSet);
@@ -152,16 +154,15 @@ public class MockBooksDb implements BooksDbInterface {
     }
     @Override
     public List<Book> getAllBooks() throws IOException, SQLException{
-        Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID ";
+                "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID";
+        Statement statement = connection.prepareStatement(sql);
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
         return getBooksFromResultSet(resultSet);
     }
-
 
     @Override
     public void addBook(Book bookToAdd) throws IOException, SQLException {
@@ -192,14 +193,15 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public void removeBook(Book bookToRemove) throws IOException, SQLException {
+    public void removeBook(Book bookToRemove) throws IOException , SQLException{
         try {
-            PreparedStatement removeBookStatement = connection.prepareStatement(
-              "UPDATE books DELETE FROM t_book WHERE t_book.isbn =" + bookToRemove.getIsbn()
-            );
+             PreparedStatement removeBookStatement = connection.prepareStatement("DELETE FROM t_book WHERE t_book.isbn = '"+bookToRemove.getIsbn()+"'");
+            connection.setAutoCommit(false);
+            removeBookStatement.executeUpdate();
+            connection.setAutoCommit(true);
 
-        } catch (SQLException e){
-            System.out.println("Error");
+        } catch (SQLException u){
+            u.printStackTrace();
         }
     }
 
@@ -209,13 +211,47 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public void addAuthor(Author author) throws IOException, SQLException {
+    public void getAllAuthors() throws IOException, SQLException {
 
     }
 
     @Override
-    public void deleteAuthor(Author author) throws IOException, SQLException {
+    public void addAuthor(Author author) throws IOException, SQLException {
+        try {
+            PreparedStatement addAuthorStatement = connection.prepareStatement(
+                    "INSERT INTO t_author(firstName,lastName,birthday) " +
+                            "VALUES (" +
+                            "'"+author.getFirstName()+"',"+
+                            "'"+author.getLastName()+"'," +
+                            "'"+author.getBirthday()+"'" +
+                            ")");
+            connection.setAutoCommit(false);
+            addAuthorStatement.executeUpdate();
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+            e.printStackTrace();
+        }
+    }
 
+    @Override
+    public void deleteAuthor(Author authorToRemove) throws IOException, SQLException {
+//        try {
+//            PreparedStatement removeAuthorStatement = connection.prepareStatement("DELETE FROM t_book WHERE t_book.isbn = '"+authorToRemove.getAuthorID()+"'");
+//            connection.setAutoCommit(false);
+//            removeAuthorStatement.executeUpdate();
+//            connection.setAutoCommit(true);
+//
+//        } catch (SQLException u){
+//            u.printStackTrace();
+//        }
     }
 
 

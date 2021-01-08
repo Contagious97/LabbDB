@@ -26,6 +26,8 @@ public interface BooksDbInterface {
 
     public List<Book> getAllBooks() throws IOException, SQLException;
 
+    public void getAllAuthors() throws IOException,SQLException;
+
     public List<Book> getBooksFromResultSet(ResultSet resultSet) throws IOException, SQLException;
     
     public List<Book> searchBooksByTitle(String title) throws IOException, SQLException;
@@ -47,6 +49,7 @@ public interface BooksDbInterface {
     public void addAuthor(Author author) throws IOException,SQLException;
 
     public void deleteAuthor(Author author) throws IOException,SQLException;
+
 
 
 
