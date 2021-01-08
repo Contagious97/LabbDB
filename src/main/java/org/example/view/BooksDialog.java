@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
 
 public class BooksDialog extends Dialog<Book> {
 
-    public BooksDialog(BooksDbInterface dbInterface) {
-        this(dbInterface,new Controller(dbInterface, null),null);
+    public BooksDialog(BooksDbInterface dbInterface,Controller controller) {
+        this(dbInterface,controller,null);
 //        final Controller controller = new Controller(dbInterface, null);
     }
 
@@ -71,7 +71,7 @@ public class BooksDialog extends Dialog<Book> {
 
 
         assignAuthorButton.setOnAction(event -> {
-            AuthorsDialog dialog = new AuthorsDialog(dbInterface);
+            AuthorsDialog dialog = new AuthorsDialog(dbInterface,controller);
             Optional<Author> result = dialog.showAndWait();
             result.ifPresent(author -> {
                 try {
@@ -143,7 +143,7 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(),(int)ratingsList.getValue());            }
+                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());            }
             return null;
         });
     }

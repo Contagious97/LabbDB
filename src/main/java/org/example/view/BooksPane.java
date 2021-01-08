@@ -1,6 +1,6 @@
 package org.example.view;
 
-import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
 import org.example.model.BooksDbInterface;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -9,11 +9,11 @@ import org.example.model.Book;
 import org.example.model.MockBooksDb;
 
 import java.io.IOException;
-import java.net.PortUnreachableException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,17 +32,20 @@ public class BooksPane extends VBox {
 
     private TableView<Book> booksTable;
     private ObservableList<Book> booksInTable; // the data backing the table view
-
+    private Book bookToRemove;
     private ComboBox<SearchMode> searchModeBox;
     private TextField searchField;
     private Button searchButton;
     private BooksDbInterface dbInterface;
+    private Book selectedBook;
 
     private MenuBar menuBar;
 
-    public BooksPane(MockBooksDb booksDb) {
+    public BooksPane(MockBooksDb booksDb) throws IOException, SQLException {
         final Controller controller = new Controller(booksDb, this);
         this.init(controller);
+        displayBooks(booksTable.getItems());
+
     }
 
     /**
@@ -106,7 +109,11 @@ public class BooksPane extends VBox {
         TableColumn<Book, Date> publishedCol = new TableColumn<>("PublishDate");
         booksTable.getColumns().addAll(titleCol, isbnCol, ratingCol, genreCol, publishedCol);
         // give title column some extra space
-        titleCol.prefWidthProperty().bind(booksTable.widthProperty().multiply(0.4));
+        titleCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        isbnCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        ratingCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        genreCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        publishedCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
 
         // define how to fill data for each cell, 
         // get values from Book properties
@@ -127,7 +134,7 @@ public class BooksPane extends VBox {
         searchModeBox.getItems().addAll(SearchMode.values());
         searchModeBox.setValue(SearchMode.Title);
         searchButton = new Button("Search");
-        
+
         // event handling (dispatch to controller)
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -152,18 +159,45 @@ public class BooksPane extends VBox {
 
 
         addItem.setOnAction(t -> {
-            BooksDialog dialog = new BooksDialog(dbInterface);
+            BooksDialog dialog = new BooksDialog(dbInterface,controller);
             Optional<Book> result = dialog.showAndWait();
             result.ifPresent(book -> {
-                System.out.println("Does it work");
-                System.out.println(book.getTitle());
                 controller.onAddBook(book);
+                booksInTable.add(book);
+                controller.onGetAllBooks();
             });
-            controller.onGetAllBooks();
         });
 
         MenuItem removeItem = new MenuItem("Remove");
+
+        booksTable.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            selectedBook = newValue;
+        }));
+
+        removeItem.setOnAction(event -> {
+            try {
+                System.out.println(selectedBook.getIsbn());
+                System.out.println(selectedBook);
+                controller.onRemoveBook(selectedBook);
+                booksInTable.remove(selectedBook);
+//                controller.onGetAllBooks();
+            } catch (Exception e){
+                e.printStackTrace();
+                System.out.println("blabla");
+            }
+        });
+
+
         MenuItem updateItem = new MenuItem("Update");
+
+        updateItem.setOnAction(event -> {
+            try {
+                controller.onGetAllBooks();
+            } catch (Exception e){
+
+            }
+        });
+
         manageMenu.getItems().addAll(addItem, removeItem, updateItem);
 
         menuBar = new MenuBar();

@@ -50,7 +50,7 @@ public class Book implements Comparable<Book>{
     }
 
     public List<Author> getAuthors(){
-        return authors;
+        return new ArrayList<>(authors);
     }
 
     public void addAuthorToBook(Author newAuthor){

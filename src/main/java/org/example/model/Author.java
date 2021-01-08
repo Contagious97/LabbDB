@@ -1,28 +1,42 @@
 package org.example.model;
-
-import java.time.LocalDate;
+import java.sql.Date;
 
 public class Author {
-    private final String name;
-    private final int age;
+    private int authorID;
+    private String firstName;
+    private String lastName;
+    private Date birthday;
 
-    public Author(String name, int age) {
-        this.name = name;
-        this.age = age;
+    public Author(int authorID,String firstName,String lastName, Date birthday) {
+        this.authorID = authorID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthday = birthday;
     }
 
-    public String getName() {
-        return name;
+    public int getAuthorID() {
+        return authorID;
     }
 
-    public int getSsn() {
-        return age;
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+
+    public Date getBirthday() {
+        return birthday;
     }
 
     @Override
     public String toString() {
         return "Author{" +
-                "name='" + name + '\'' +
-                ", age='" + age + '\'';
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", birthday=" + birthday +
+                '}';
     }
 }
