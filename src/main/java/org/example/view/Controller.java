@@ -111,7 +111,7 @@ public class Controller {
     }
 
     private boolean isValidTitle(Book bookToCheck){
-        if(bookToCheck.getTitle().length() > 30 || book.getTitle().length() < 1){
+        if(bookToCheck.getTitle().length() > 30 || bookToCheck.getTitle().length() < 1){
             return false;
         }
         return true;

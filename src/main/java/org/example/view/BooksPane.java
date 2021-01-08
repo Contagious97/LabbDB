@@ -158,8 +158,8 @@ public class BooksPane extends VBox {
                 System.out.println("Does it work");
                 System.out.println(book.getTitle());
                 controller.onAddBook(book);
-                controller.onGetAllBooks();
             });
+            controller.onGetAllBooks();
         });
 
         MenuItem removeItem = new MenuItem("Remove");

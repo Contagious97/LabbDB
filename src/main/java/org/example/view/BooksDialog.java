@@ -60,12 +60,12 @@ public class BooksDialog extends Dialog<Book> {
         title.setPromptText("Title");
         TextField isbn = new TextField();
 
-        Pattern pattern = Pattern.compile("[0-9]{0,13}");
-        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
-            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
-        });
-
-        isbn.setTextFormatter(formatter);
+//        Pattern pattern = Pattern.compile("[0-9]{0,13}");
+//        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
+//            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
+//        });
+//
+//        isbn.setTextFormatter(formatter);
 
         isbn.setPromptText("ISBN");
 

@@ -99,8 +99,8 @@ public class MockBooksDb implements BooksDbInterface {
     public List<Book> searchBooksByAuthor(String searchAuthorName) throws IOException, SQLException {
         Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE UPPER(t_author.name) LIKE '%" + searchAuthorName.toUpperCase()+ "%'";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
@@ -114,8 +114,8 @@ public class MockBooksDb implements BooksDbInterface {
     public List<Book> searchBooksByISBN(String searchIsbn) throws IOException, SQLException {
         Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE t_book.isbn LIKE '%" + searchIsbn + "%'";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
@@ -129,8 +129,8 @@ public class MockBooksDb implements BooksDbInterface {
     public List<Book> searchBooksByRating(int searchRating) throws IOException, SQLException {
         Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE t_book.grade =" + searchRating;
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
@@ -142,8 +142,8 @@ public class MockBooksDb implements BooksDbInterface {
     public List<Book> searchBooksByGenre(String searchGenre) throws IOException, SQLException {
         Statement statement = connection.createStatement();
         String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
+                "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
+                "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE t_book.genre LIKE '%" + searchGenre + "%'";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
@@ -153,9 +153,8 @@ public class MockBooksDb implements BooksDbInterface {
     @Override
     public List<Book> getAllBooks() throws IOException, SQLException{
         Statement statement = connection.createStatement();
-        String sql = "SELECT * FROM t_book " +
-                "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
-                "JOIN t_author ON t_bookauthors.authorID = t_author.authorID ";
+        String sql = "SELECT * FROM t_book ";
+
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
