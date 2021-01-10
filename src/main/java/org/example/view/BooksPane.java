@@ -74,6 +74,7 @@ public class BooksPane extends VBox {
         // types: INFORMATION, WARNING et c.
         Alert alert = new Alert(type, msg);
         alert.showAndWait();
+
     }
 
     private void init(Controller controller) {
@@ -178,7 +179,7 @@ public class BooksPane extends VBox {
             Optional<Book> result = dialog.showAndWait();
             result.ifPresent(book -> {
                 controller.onAddBook(book);
-                booksInTable.add(book);
+                booksInTable.add(0,book);
                 controller.onGetAllBooks();
             });
         });
@@ -190,19 +191,15 @@ public class BooksPane extends VBox {
         }));
 
         removeItem.setOnAction(event -> {
-            try {
-                showAlertAndWait("Are you sure that you want to remove the book?", Alert.AlertType.WARNING);
-                System.out.println(selectedBook.getIsbn());
-                System.out.println(selectedBook);
-                controller.onRemoveBook(selectedBook);
-                booksInTable.remove(selectedBook);
-//                controller.onGetAllBooks();
-            } catch (Exception e){
-                e.printStackTrace();
-                System.out.println("blabla");
-            }
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to remove this book?");
+                    Optional<ButtonType> buttonChoice = alert.showAndWait();
+                    if(buttonChoice.get() == ButtonType.OK){
+                        System.out.println(selectedBook.getIsbn());
+                        System.out.println(selectedBook);
+                        controller.onRemoveBook(selectedBook);
+                        booksInTable.remove(selectedBook);
+                    }
         });
-
 
         MenuItem updateItem = new MenuItem("Update");
 

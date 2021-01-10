@@ -80,11 +80,12 @@ public class BooksDialog extends Dialog<Book> {
             AuthorsDialog dialog = new AuthorsDialog(dbInterface,controller);
             Optional<Author> result = dialog.showAndWait();
             result.ifPresent(author -> {
-//                try {
-//                    controller.onAddAuthor(author);
-//                } catch (SQLException | IOException throwables) {
-//                    throwables.printStackTrace();
-//                }
+
+                try {
+                    controller.onAddAuthor(author);
+                } catch (SQLException | IOException throwables) {
+                    throwables.printStackTrace();
+                }
             });
         });
 
@@ -107,7 +108,6 @@ public class BooksDialog extends Dialog<Book> {
 
         List<Genre> genres =
                 new ArrayList<>(EnumSet.allOf(Genre.class));
-        System.out.println(genres);
 
         ComboBox genreList =  new ComboBox(FXCollections
                 .observableArrayList(genres));
@@ -164,7 +164,9 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());            }
+                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());
+                //ska vi inte på något sätt kunna lägga till authors här?
+            }
             return null;
         });
     }

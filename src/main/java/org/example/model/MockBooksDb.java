@@ -35,7 +35,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
         System.out.println("Connected...");
 
         return true;
@@ -275,15 +275,23 @@ public class MockBooksDb implements BooksDbInterface {
 
     @Override
     public void deleteAuthor(Author authorToRemove) throws IOException, SQLException {
-//        try {
-//            PreparedStatement removeAuthorStatement = connection.prepareStatement("DELETE FROM t_book WHERE t_book.isbn = '"+authorToRemove.getAuthorID()+"'");
-//            connection.setAutoCommit(false);
-//            removeAuthorStatement.executeUpdate();
-//            connection.setAutoCommit(true);
-//
-//        } catch (SQLException u){
-//            u.printStackTrace();
-//        }
+        try {
+            PreparedStatement removeAuthorStatement = connection.prepareStatement("DELETE FROM t_author WHERE t_author.authorID = '"+authorToRemove.getAuthorID()+"'");
+            connection.setAutoCommit(false);
+            removeAuthorStatement.executeUpdate();
+            connection.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            if(connection!= null){
+                try {
+                    System.err.print("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
+            e.printStackTrace();
+        }
     }
 
 

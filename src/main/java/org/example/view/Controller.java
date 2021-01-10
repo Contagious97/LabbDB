@@ -142,7 +142,8 @@ public class Controller {
     }
 
     protected void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
-        new Thread(()-> {
+        new Thread(()->{
+
             try {
                 booksDb.deleteAuthor(authorToDelete);
             } catch (IOException | SQLException e) {

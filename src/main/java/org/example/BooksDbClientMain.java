@@ -26,7 +26,7 @@ public class BooksDbClientMain extends Application {
         BooksPane root = new BooksPane(booksDb);
 
         try {
-            booksDb.connect("library");
+            booksDb.connect("sys");
             root.displayBooks(booksDb.getAllBooks());
             System.out.println("Connected to database");
         } catch (Exception e){

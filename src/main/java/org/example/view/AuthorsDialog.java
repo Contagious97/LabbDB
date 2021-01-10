@@ -1,5 +1,6 @@
 package org.example.view;
 
+import com.mysql.cj.xdevapi.Result;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,6 +27,8 @@ public class AuthorsDialog extends Dialog<Author> {
     private final TableView<Author> authorsTable;
     private final ObservableList<Author> authorsInTable;
     private List<Author> authorList;
+    private Author selectedAuthor;
+    private ListView<Author> authorsFromBook;
 
 
     public AuthorsDialog(BooksDbInterface dbInterface, Controller controller) {
@@ -66,6 +69,15 @@ public class AuthorsDialog extends Dialog<Author> {
         authorsInTable = FXCollections.observableArrayList();
         authorsInTable.addAll(authorList);
         authorsTable.setItems(authorsInTable);
+
+
+        Button arrowAuthorButton = new Button("-->");
+
+        authorsFromBook = new ListView<>();
+
+
+        authorsFromBook.setMaxHeight(200);
+        authorsFromBook.setPrefWidth(200);
 
         Button addAuthorButton = new Button("Add");
         Button deleteAuthorButton = new Button("Delete");
@@ -109,18 +121,19 @@ public class AuthorsDialog extends Dialog<Author> {
         grid.add(addAuthorButton, 1, 3);
         grid.add(deleteAuthorButton, 1, 5);
         grid.add(authorsTable,1,4);
+        grid.add(arrowAuthorButton,2,4);
+        grid.add(authorsFromBook,3,4);
+        grid.add(new Label("List of  all authors:"), 2, 3);
 
+//
+//        Node confirmButton = this.getDialogPane().lookupButton(closeButtonType);
+//        Node addButton = this.getDialogPane().lookupButton(closeButtonType);
+////        confirmButton.setDisable(true);
 
-        Node confirmButton = this.getDialogPane().lookupButton(closeButtonType);
-        Node addButton = this.getDialogPane().lookupButton(closeButtonType);
-//        confirmButton.setDisable(true);
-
-//        addAuthorButton.textProperty().addListener((observable, oldValue, newValue) -> {
-//            confirmButton.setDisable(newValue.trim().isEmpty());
-//        });
+//
         addAuthorButton.setOnAction(event -> {
                 try {
-                    authorList.add(new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
+                    authorList.add(0,new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
                     //controller.onAddAuthor(new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
                     authorsInTable.clear();
                     for (Author author1: authorList){
@@ -131,24 +144,21 @@ public class AuthorsDialog extends Dialog<Author> {
                 }
             });
 
-//        Author selectedAuthor = authorsTable.getSelectionModel().getSelectedItem();
-//        System.out.println(author.getAuthorID());
-
 
         deleteAuthorButton.setOnAction(event -> {
-            try {
-
-                System.out.println("Deleted");
-                controller.onDeleteAuthor(null);
-            } catch (SQLException | IOException throwables) {
-                throwables.printStackTrace();
-            }
+            selectedAuthor = authorsTable.getSelectionModel().getSelectedItem();
+            authorList.remove(selectedAuthor);
+            authorsInTable.clear();
+            authorsInTable.addAll(authorList);
+//            for (Author author1: authorList){
+//                authorsInTable.add(author1);
+//            }
         });
-//
-//        deleteAuthorButton.textProperty().addListener((observable, oldValue, newValue) -> {
-//            System.out.println("INN");
-//            addButton.setDisable(newValue.trim().isEmpty());
-//        });
+        arrowAuthorButton.setOnAction(event -> {
+            System.out.println("arrow");
+            selectedAuthor = authorsTable.getSelectionModel().selectedItemProperty().get();
+            authorsFromBook.getItems().add(selectedAuthor);
+        });
 
         this.getDialogPane().setContent(grid);
 
