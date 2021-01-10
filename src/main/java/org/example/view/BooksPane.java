@@ -41,9 +41,10 @@ public class BooksPane extends VBox {
 
     private MenuBar menuBar;
 
-    public BooksPane(MockBooksDb booksDb) throws IOException, SQLException {
+    public BooksPane(BooksDbInterface booksDb) throws IOException, SQLException {
         final Controller controller = new Controller(booksDb, this);
         this.init(controller);
+        this.dbInterface = booksDb;
         displayBooks(booksTable.getItems());
 
     }
@@ -155,7 +156,21 @@ public class BooksPane extends VBox {
         fileMenu.getItems().addAll(exitItem, connectItem, disconnectItem);
 
         Menu manageMenu = new Menu("Manage");
-        MenuItem addItem = new MenuItem("Add");
+        MenuItem addItem = new MenuItem("Add Book");
+        MenuItem modifyItem = new MenuItem("Modify Book");
+
+        modifyItem.setOnAction(t->{
+            if (booksTable.getSelectionModel().getSelectedItem() == null){
+                showAlertAndWait("No book selected", Alert.AlertType.WARNING);
+            }
+            else {
+                BooksDialog dialog = new BooksDialog(dbInterface, controller, booksTable.getSelectionModel().getSelectedItem());
+                Optional<Book> result = dialog.showAndWait();
+                result.ifPresent(book -> {
+                    controller.onModifyBook(book);
+                });
+            }
+        });
 
 
         addItem.setOnAction(t -> {
@@ -176,6 +191,7 @@ public class BooksPane extends VBox {
 
         removeItem.setOnAction(event -> {
             try {
+                showAlertAndWait("Are you sure that you want to remove the book?", Alert.AlertType.WARNING);
                 System.out.println(selectedBook.getIsbn());
                 System.out.println(selectedBook);
                 controller.onRemoveBook(selectedBook);
@@ -198,7 +214,7 @@ public class BooksPane extends VBox {
             }
         });
 
-        manageMenu.getItems().addAll(addItem, removeItem, updateItem);
+        manageMenu.getItems().addAll(addItem, modifyItem, removeItem, updateItem);
 
         menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu, manageMenu);

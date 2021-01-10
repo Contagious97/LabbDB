@@ -69,16 +69,22 @@ public class BooksDialog extends Dialog<Book> {
 
         isbn.setPromptText("ISBN");
 
+        if (book != null){
+            title.textProperty().setValue(book.getTitle());
+            isbn.textProperty().setValue(book.getIsbn());
+            isbn.setDisable(true);
+        }
+
 
         assignAuthorButton.setOnAction(event -> {
             AuthorsDialog dialog = new AuthorsDialog(dbInterface,controller);
             Optional<Author> result = dialog.showAndWait();
             result.ifPresent(author -> {
-                try {
-                    controller.onAddAuthor(author);
-                } catch (SQLException | IOException throwables) {
-                    throwables.printStackTrace();
-                }
+//                try {
+//                    controller.onAddAuthor(author);
+//                } catch (SQLException | IOException throwables) {
+//                    throwables.printStackTrace();
+//                }
             });
         });
 
@@ -105,7 +111,11 @@ public class BooksDialog extends Dialog<Book> {
 
         ComboBox genreList =  new ComboBox(FXCollections
                 .observableArrayList(genres));
-        genreList.setValue("Choose a genre");
+        if (book == null) {
+            genreList.setValue("Choose a genre");
+        }
+        else
+            genreList.setValue(book.getGenre());
 
         grid.add(new Label("Genres:"), 0, 3);
         grid.add(genreList, 1, 3);
@@ -114,12 +124,19 @@ public class BooksDialog extends Dialog<Book> {
         ComboBox ratingsList =
                 new ComboBox(FXCollections
                         .observableArrayList(ratings));
-        ratingsList.setValue("Choose a rating");
+        if (book == null){
+            ratingsList.setValue("Choose a rating");
+        }
+        else
+            ratingsList.setValue(book.getGrade());
 
         grid.add(new Label("Rating:"), 0, 4);
         grid.add(ratingsList, 1, 4);
 
         DatePicker published = new DatePicker(LocalDate.now());
+        if (book != null){
+            published.setValue(book.getPublishDate().toLocalDate());
+        }
 
         grid.add(new Label("Published Date:"), 0, 5);
         grid.add(published, 1, 5);
@@ -130,9 +147,13 @@ public class BooksDialog extends Dialog<Book> {
         confirmButton.setDisable(true);
 
         // Do some validation (using the Java 8 lambda syntax).
-        title.textProperty().addListener((observable, oldValue, newValue) -> {
-            confirmButton.setDisable(newValue.trim().isEmpty());
-        });
+        if (book == null){
+            title.textProperty().addListener((observable, oldValue, newValue) -> {
+                confirmButton.setDisable(newValue.trim().isEmpty());
+            });
+        }
+        else confirmButton.setDisable(false);
+
 
         this.getDialogPane().setContent(grid);
 

@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import org.example.model.Author;
@@ -15,6 +16,7 @@ import org.example.model.BooksDbInterface;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -23,25 +25,32 @@ import java.util.regex.Pattern;
 public class AuthorsDialog extends Dialog<Author> {
     private final TableView<Author> authorsTable;
     private final ObservableList<Author> authorsInTable;
+    private List<Author> authorList;
 
 
-    public AuthorsDialog(BooksDbInterface dbInterface,Controller controller) {
-        this(dbInterface,controller,null);
-    }
-
-    public AuthorsDialog(BooksDbInterface dbInterface, Controller controller, Author author) {
+    public AuthorsDialog(BooksDbInterface dbInterface, Controller controller) {
         super();
+
         this.setTitle("Author Dialog");
         this.setHeaderText("Add or delete an author");
-
+        authorList = new ArrayList<>();
         authorsTable = new TableView<>();
         authorsTable.setPrefWidth(300);
         authorsTable.setPrefHeight(200);
+        try {
+            authorList = dbInterface.getAllAuthors();
+        } catch (SQLException | IOException e){
+            e.printStackTrace();
+        }
 
         TableColumn<Author, String> name= new TableColumn<>("Name");
         TableColumn<Author, String> firstName = new TableColumn<>("First name");
         TableColumn<Author, String> lastName= new TableColumn<>("Last name");
         TableColumn<Author, String> birthDay= new TableColumn<>("Birthday");
+        firstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        lastName.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        birthDay.setCellValueFactory(new PropertyValueFactory<>("Birthday"));
+
 
         name.getColumns().addAll(firstName, lastName);
         firstName.setPrefWidth(authorsTable.getPrefWidth()/3);
@@ -55,6 +64,7 @@ public class AuthorsDialog extends Dialog<Author> {
 
         this.getDialogPane().getButtonTypes().addAll(closeButtonType);
         authorsInTable = FXCollections.observableArrayList();
+        authorsInTable.addAll(authorList);
         authorsTable.setItems(authorsInTable);
 
         Button addAuthorButton = new Button("Add");
@@ -110,10 +120,14 @@ public class AuthorsDialog extends Dialog<Author> {
 //        });
         addAuthorButton.setOnAction(event -> {
                 try {
-                    controller.onAddAuthor(new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
-                    authorsInTable.add(author);
-                } catch (SQLException | IOException throwables) {
-                    throwables.printStackTrace();
+                    authorList.add(new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
+                    //controller.onAddAuthor(new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
+                    authorsInTable.clear();
+                    for (Author author1: authorList){
+                        authorsInTable.add(author1);
+                    }
+                } catch (Exception e ) {
+
                 }
             });
 
@@ -125,7 +139,7 @@ public class AuthorsDialog extends Dialog<Author> {
             try {
 
                 System.out.println("Deleted");
-                controller.onDeleteAuthor(author);
+                controller.onDeleteAuthor(null);
             } catch (SQLException | IOException throwables) {
                 throwables.printStackTrace();
             }
@@ -149,7 +163,6 @@ public class AuthorsDialog extends Dialog<Author> {
 //            else{
                 return authorsTable.getSelectionModel().selectedItemProperty().get();
 //            }
-//            return null;
         });
     }
 }

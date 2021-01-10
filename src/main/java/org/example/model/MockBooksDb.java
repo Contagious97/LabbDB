@@ -35,7 +35,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
         System.out.println("Connected...");
 
         return true;
@@ -207,12 +207,44 @@ public class MockBooksDb implements BooksDbInterface {
 
     @Override
     public void modifyBook(Book bookToModify) throws IOException, SQLException {
+        try {
+            PreparedStatement modifyBookStatement = connection.prepareStatement(
+                    "UPDATE t_book SET title = ?, " +
+                    "publishDate = ?, " +
+                    "grade = ?, " +
+                    "genre = ? " +
+                    "WHERE isbn = ?");
+
+            modifyBookStatement.setString(1,bookToModify.getTitle());
+            modifyBookStatement.setDate(2,bookToModify.getPublishDate());
+            modifyBookStatement.setInt(3,bookToModify.getGrade());
+            modifyBookStatement.setString(4,bookToModify.getGenre());
+            modifyBookStatement.setString(5,bookToModify.getIsbn());
+
+            connection.setAutoCommit(false);
+            modifyBookStatement.executeUpdate();
+            connection.setAutoCommit(true);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 
     @Override
-    public void getAllAuthors() throws IOException, SQLException {
+    public List<Author> getAllAuthors() throws IOException, SQLException {
+        String sql = "SELECT * from t_author";
+        Statement statement = connection.prepareStatement(sql);
+        statement.execute(sql);
+        ResultSet resultSet = statement.getResultSet();
 
+        List<Author> authorList = new ArrayList<>();
+
+        while (resultSet.next()){
+            authorList.add(new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),
+                    resultSet.getString("lastName"),resultSet.getDate("birthday")));
+        }
+
+        return authorList;
     }
 
     @Override

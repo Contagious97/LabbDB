@@ -97,6 +97,17 @@ public class Controller {
         }).start();
     }
 
+    protected void onModifyBook(Book bookToModify){
+        new Thread(()->{
+            try {
+                booksDb.modifyBook(bookToModify);
+            } catch (IOException | SQLException e){
+                e.printStackTrace();
+
+            }
+        }).start();
+    }
+
     protected void onGetAllBooks(){
         new Thread(()->{
             try {

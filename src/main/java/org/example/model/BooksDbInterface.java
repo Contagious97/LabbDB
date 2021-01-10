@@ -26,7 +26,7 @@ public interface BooksDbInterface {
 
     public List<Book> getAllBooks() throws IOException, SQLException;
 
-    public void getAllAuthors() throws IOException,SQLException;
+    public List<Author> getAllAuthors() throws IOException,SQLException;
 
     public List<Book> getBooksFromResultSet(ResultSet resultSet) throws IOException, SQLException;
     
