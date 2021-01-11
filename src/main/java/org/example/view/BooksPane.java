@@ -1,15 +1,13 @@
 package org.example.view;
 
-import javafx.stage.Stage;
+import org.example.Controller;
 import org.example.model.BooksDbInterface;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.example.model.SearchMode;
 import org.example.model.Book;
-import org.example.model.MockBooksDb;
 
 import java.io.IOException;
-import java.net.PortUnreachableException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
@@ -32,17 +30,21 @@ public class BooksPane extends VBox {
 
     private TableView<Book> booksTable;
     private ObservableList<Book> booksInTable; // the data backing the table view
-
+    private Book bookToRemove;
     private ComboBox<SearchMode> searchModeBox;
     private TextField searchField;
     private Button searchButton;
     private BooksDbInterface dbInterface;
+    private Book selectedBook;
 
     private MenuBar menuBar;
 
-    public BooksPane(MockBooksDb booksDb) {
+    public BooksPane(BooksDbInterface booksDb) throws IOException, SQLException {
         final Controller controller = new Controller(booksDb, this);
         this.init(controller);
+        this.dbInterface = booksDb;
+        //displayBooks(booksTable.getItems());
+
     }
 
     /**
@@ -52,6 +54,7 @@ public class BooksPane extends VBox {
      * @param books the books to display
      */
     public void displayBooks(List<Book> books) {
+        System.out.println(books.toString());
         booksInTable.clear();
         booksInTable.addAll(books);
     }
@@ -70,6 +73,7 @@ public class BooksPane extends VBox {
         // types: INFORMATION, WARNING et c.
         Alert alert = new Alert(type, msg);
         alert.showAndWait();
+
     }
 
     private void init(Controller controller) {
@@ -106,7 +110,11 @@ public class BooksPane extends VBox {
         TableColumn<Book, Date> publishedCol = new TableColumn<>("PublishDate");
         booksTable.getColumns().addAll(titleCol, isbnCol, ratingCol, genreCol, publishedCol);
         // give title column some extra space
-        titleCol.prefWidthProperty().bind(booksTable.widthProperty().multiply(0.4));
+        titleCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        isbnCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        ratingCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        genreCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
+        publishedCol.prefWidthProperty().bind(booksTable.widthProperty().divide(5));
 
         // define how to fill data for each cell, 
         // get values from Book properties
@@ -127,7 +135,7 @@ public class BooksPane extends VBox {
         searchModeBox.getItems().addAll(SearchMode.values());
         searchModeBox.setValue(SearchMode.Title);
         searchButton = new Button("Search");
-        
+
         // event handling (dispatch to controller)
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -148,23 +156,72 @@ public class BooksPane extends VBox {
         fileMenu.getItems().addAll(exitItem, connectItem, disconnectItem);
 
         Menu manageMenu = new Menu("Manage");
-        MenuItem addItem = new MenuItem("Add");
+        MenuItem addItem = new MenuItem("Add Book");
+        MenuItem modifyItem = new MenuItem("Modify Book");
+
+        modifyItem.setOnAction(t->{
+            if (booksTable.getSelectionModel().getSelectedItem() == null){
+                showAlertAndWait("No book selected", Alert.AlertType.WARNING);
+            }
+            else {
+                Book bookToModify = booksTable.getSelectionModel().getSelectedItem();
+                int index = booksInTable.indexOf(bookToModify);
+                BooksDialog dialog = new BooksDialog(dbInterface, controller, bookToModify);
+                Optional<Book> result = dialog.showAndWait();
+                result.ifPresent(book -> {
+                    try {
+                        System.out.println("modifieubnasd");
+                        controller.onModifyBook(bookToModify,book);
+                        booksInTable.remove(index);
+                        booksInTable.add(index,book);
+                        System.out.println(book.getAuthors().toString());
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                });
+            }
+        });
 
 
         addItem.setOnAction(t -> {
-            BooksDialog dialog = new BooksDialog(dbInterface);
+            BooksDialog dialog = new BooksDialog(dbInterface,controller);
             Optional<Book> result = dialog.showAndWait();
             result.ifPresent(book -> {
-                System.out.println("Does it work");
-                System.out.println(book.getTitle());
                 controller.onAddBook(book);
+                booksInTable.add(0,book);
                 controller.onGetAllBooks();
+                System.out.println(book.getAuthors().get(0).getAuthorID());
             });
         });
 
         MenuItem removeItem = new MenuItem("Remove");
+
+        booksTable.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            selectedBook = newValue;
+        }));
+
+        removeItem.setOnAction(event -> {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to remove this book?");
+                    Optional<ButtonType> buttonChoice = alert.showAndWait();
+                    if(buttonChoice.get() == ButtonType.OK){
+                        System.out.println(selectedBook.getIsbn());
+                        System.out.println(selectedBook);
+                        controller.onRemoveBook(selectedBook);
+                        booksInTable.remove(selectedBook);
+                    }
+        });
+
         MenuItem updateItem = new MenuItem("Update");
-        manageMenu.getItems().addAll(addItem, removeItem, updateItem);
+
+        updateItem.setOnAction(event -> {
+            try {
+                controller.onGetAllBooks();
+            } catch (Exception e){
+
+            }
+        });
+
+        manageMenu.getItems().addAll(addItem, modifyItem, removeItem, updateItem);
 
         menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu, manageMenu);

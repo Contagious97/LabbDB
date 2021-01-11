@@ -2,15 +2,11 @@ package org.example.view;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.util.Pair;
+import org.example.Controller;
 import org.example.model.*;
 
 import java.io.IOException;
@@ -20,18 +16,23 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
 
 public class BooksDialog extends Dialog<Book> {
 
-    public BooksDialog(BooksDbInterface dbInterface) {
-        this(dbInterface,new Controller(dbInterface, null),null);
+    private Book bookToAdd;
+    private List<Author> authorList;
+
+    public BooksDialog(BooksDbInterface dbInterface, Controller controller) {
+        this(dbInterface,controller,null);
 //        final Controller controller = new Controller(dbInterface, null);
     }
 
     public BooksDialog(BooksDbInterface dbInterface, Controller controller,Book book) {
         super();
+
+        System.out.println("Begining of book dialog");
+        //System.out.println(book.getAuthors().toString());
+        authorList = new ArrayList<>();
 
         if(book == null){
             this.setTitle("Add Books Dialog");
@@ -60,24 +61,31 @@ public class BooksDialog extends Dialog<Book> {
         title.setPromptText("Title");
         TextField isbn = new TextField();
 
-        Pattern pattern = Pattern.compile("[0-9]{0,13}");
-        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
-            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
-        });
-
-        isbn.setTextFormatter(formatter);
+//        Pattern pattern = Pattern.compile("[0-9]{0,13}");
+//        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
+//            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
+//        });
+//
+//        isbn.setTextFormatter(formatter);
 
         isbn.setPromptText("ISBN");
 
+        if (book != null){
+            title.textProperty().setValue(book.getTitle());
+            isbn.textProperty().setValue(book.getIsbn());
+            isbn.setDisable(true);
+        }
+
 
         assignAuthorButton.setOnAction(event -> {
-            AuthorsDialog dialog = new AuthorsDialog(dbInterface);
+            AuthorsDialog dialog = new AuthorsDialog(dbInterface,controller,authorList,book);
             Optional<Author> result = dialog.showAndWait();
             result.ifPresent(author -> {
                 try {
-                    controller.onAddAuthor(author);
-                } catch (SQLException | IOException throwables) {
-                    throwables.printStackTrace();
+                    //book.addAuthors(authorList);
+                    controller.onGetAllAuthors();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         });
@@ -101,11 +109,14 @@ public class BooksDialog extends Dialog<Book> {
 
         List<Genre> genres =
                 new ArrayList<>(EnumSet.allOf(Genre.class));
-        System.out.println(genres);
 
         ComboBox genreList =  new ComboBox(FXCollections
                 .observableArrayList(genres));
-        genreList.setValue("Choose a genre");
+        if (book == null) {
+            genreList.setValue("Choose a genre");
+        }
+        else
+            genreList.setValue(book.getGenre());
 
         grid.add(new Label("Genres:"), 0, 3);
         grid.add(genreList, 1, 3);
@@ -114,12 +125,19 @@ public class BooksDialog extends Dialog<Book> {
         ComboBox ratingsList =
                 new ComboBox(FXCollections
                         .observableArrayList(ratings));
-        ratingsList.setValue("Choose a rating");
+        if (book == null){
+            ratingsList.setValue("Choose a rating");
+        }
+        else
+            ratingsList.setValue(book.getGrade());
 
         grid.add(new Label("Rating:"), 0, 4);
         grid.add(ratingsList, 1, 4);
 
         DatePicker published = new DatePicker(LocalDate.now());
+        if (book != null){
+            published.setValue(book.getPublishDate().toLocalDate());
+        }
 
         grid.add(new Label("Published Date:"), 0, 5);
         grid.add(published, 1, 5);
@@ -130,9 +148,13 @@ public class BooksDialog extends Dialog<Book> {
         confirmButton.setDisable(true);
 
         // Do some validation (using the Java 8 lambda syntax).
-        title.textProperty().addListener((observable, oldValue, newValue) -> {
-            confirmButton.setDisable(newValue.trim().isEmpty());
-        });
+        if (book == null){
+            title.textProperty().addListener((observable, oldValue, newValue) -> {
+                confirmButton.setDisable(newValue.trim().isEmpty());
+            });
+        }
+        else confirmButton.setDisable(false);
+
 
         this.getDialogPane().setContent(grid);
 
@@ -143,7 +165,14 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(),(int)ratingsList.getValue());            }
+                    bookToAdd = new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());
+                    if (authorList.size() == 0 && book != null){
+                        authorList = book.getAuthors();
+                    }
+                    bookToAdd.addAuthors(authorList);
+                    return bookToAdd;
+                //ska vi inte på något sätt kunna lägga till authors här?
+            }
             return null;
         });
     }
