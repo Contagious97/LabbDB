@@ -1,6 +1,7 @@
 package org.example;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import org.example.model.*;
 import org.example.view.BooksPane;
 
@@ -70,7 +71,6 @@ public class Controller {
     }
 
     public void onAddBook(Book bookToAdd){
-        System.out.println(bookToAdd);
         new Thread(()->{
            try {
                if (!isValidIsbn(bookToAdd)){
@@ -83,6 +83,7 @@ public class Controller {
                }
 
            } catch (Exception e){
+               Platform.runLater(()-> BooksPane.showAlertAndWait("Error adding book",WARNING));
                 e.printStackTrace();
            }
         }).start();
@@ -93,6 +94,7 @@ public class Controller {
             try {
                 booksDb.removeBook(bookToRemove);
             } catch (IOException | SQLException e) {
+                Platform.runLater(()-> BooksPane.showAlertAndWait("Error removing book",WARNING));
                 e.printStackTrace();
             }
         }).start();
@@ -103,19 +105,26 @@ public class Controller {
             try {
                 booksDb.modifyBook(bookToModify, newBook);
             } catch (IOException | SQLException e){
-                e.printStackTrace();
+                Platform.runLater(()-> BooksPane.showAlertAndWait("Error modifying book",WARNING));;
             }
         }).start();
     }
 
+    public void onDisconnect() throws SQLException{
+        try {
+            booksDb.disconnect();
+        } catch (SQLException | IOException e){
+            Platform.runLater(()->BooksPane.showAlertAndWait("Error disconnecting", WARNING));
+        }
+    }
+
     public void onGetAllBooks(){
         new Thread(()->{
-            System.out.println("getting all books");
             try {
                 booksView.displayBooks(booksDb.getAllBooks());
-                //System.out.println(booksDb.getAllBooks().get(6).getAuthors().get(0).toString());
             } catch (Exception e){
                 System.out.println("Error");
+                Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error getting the books. Try again",WARNING));
                 e.printStackTrace();
             }
         }).start();
@@ -127,6 +136,7 @@ public class Controller {
                 booksView.displayBooks(booksDb.getAllBooks());
             } catch (Exception e){
                 System.out.println("Error");
+                Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error getting the authors",WARNING));
                 e.printStackTrace();
             }
         }).start();
@@ -135,12 +145,12 @@ public class Controller {
     public void onAddAuthor(Author authorToAdd) throws SQLException,IOException{
         new Thread(()->{
             try {
-                //System.out.println(authorToAdd);
                 booksDb.addAuthor(authorToAdd);
                 if (booksDb.getLatestAuthorID() != 0){
                     authorToAdd.setAuthorID(booksDb.getLatestAuthorID());
                 }
             } catch (IOException | SQLException e) {
+                Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error adding the author",WARNING));
                 e.printStackTrace();
             }
         }).start();
@@ -148,10 +158,10 @@ public class Controller {
 
     public void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
         new Thread(()->{
-
             try {
                 booksDb.deleteAuthor(authorToDelete);
             } catch (IOException | SQLException e) {
+                Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error deleting the author",WARNING));
                 e.printStackTrace();
             }
         }).start();

@@ -6,7 +6,10 @@
 package org.example.model;
 
 
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
+import org.example.view.BooksPane;
 
 import java.io.IOException;
 import java.sql.*;
@@ -35,7 +38,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "momo", "password123");
         System.out.println("Connected...");
 
         return true;
@@ -77,7 +80,6 @@ public class MockBooksDb implements BooksDbInterface {
         while (resultSet.next()){
 
             String isbn = resultSet.getString("isbn");
-            System.out.println(isbn);
 
             for (Book book: result){
                 if (book == null){
@@ -101,9 +103,8 @@ public class MockBooksDb implements BooksDbInterface {
                 result.add(bookToAdd);
                 index = result.indexOf(bookToAdd);
             }
-//            resultSet.getDate("birthday").toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+
             int authorID = resultSet.getInt("authorID");
-            System.out.println(authorID);
 
             try {
                 if (authorID != 0){
@@ -114,7 +115,6 @@ public class MockBooksDb implements BooksDbInterface {
             } catch (Exception e){
                 System.out.println("Error adding author");
             }
-            System.out.println(bookToAdd.toString());
             isNewBook = true;
         }
         resultSet.close();
@@ -128,7 +128,7 @@ public class MockBooksDb implements BooksDbInterface {
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
-                "WHERE UPPER(t_author.name) LIKE '%" + searchAuthorName.toUpperCase()+ "%'";
+                "WHERE UPPER(CONCAT(t_author.firstName, ' ' ,t_author.lastName)) LIKE '%" + searchAuthorName.toUpperCase()+ "%'";
         statement.execute(sql);
         ResultSet resultSet = statement.getResultSet();
 
@@ -205,7 +205,6 @@ public class MockBooksDb implements BooksDbInterface {
             for (Author author: bookToAdd.getAuthors()){
                 if (bookToAdd.getAuthors().size() != 0){
                     addBookAuthors(bookToAdd.getIsbn(),author.getAuthorID()).executeUpdate();
-                    System.out.println(author.getAuthorID());
                 }
             }
             connection.setAutoCommit(true);
@@ -219,6 +218,7 @@ public class MockBooksDb implements BooksDbInterface {
                 }
             }
             e.printStackTrace();
+            Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error adding the Book", Alert.AlertType.WARNING));
         }
     }
 
@@ -231,7 +231,7 @@ public class MockBooksDb implements BooksDbInterface {
             connection.setAutoCommit(true);
 
         } catch (SQLException u){
-            u.printStackTrace();
+            throw u;
         }
     }
 
@@ -301,13 +301,12 @@ public class MockBooksDb implements BooksDbInterface {
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1,isbn);
         statement.setInt(2,authorID);
-        System.out.println(isbn + ": " + authorID);
 
         return statement;
     }
 
     @Override
-    public int getLatestAuthorID(){
+    public int getLatestAuthorID() throws SQLException{
         int latestAuthorID = 0;
         try {
             String sql = "SELECT authorID FROM t_author ORDER BY authorID DESC LIMIT 1";
@@ -320,9 +319,9 @@ public class MockBooksDb implements BooksDbInterface {
             return latestAuthorID;
         } catch (SQLException  e){
             e.printStackTrace();
+            throw e;
         }
 
-        return 0;
     }
 
     @Override
@@ -349,6 +348,7 @@ public class MockBooksDb implements BooksDbInterface {
                 }
             }
             e.printStackTrace();
+            throw e;
         }
     }
 
@@ -370,16 +370,9 @@ public class MockBooksDb implements BooksDbInterface {
                 }
             }
             e.printStackTrace();
+            throw e;
         }
     }
 
 
-//    private static final Book[] DATA = {
-//        new Book(1, "123456789", "Databases Illuminated", new Date(1990, 1, 1)),
-//        new Book(2, "456789012", "The buried giant", new Date(2000, 1, 1)),
-//        new Book(2, "567890123", "Never let me go", new Date(2000, 1, 1)),
-//        new Book(2, "678901234", "The remains of the day", new Date(2000, 1, 1)),
-//        new Book(2, "234567890", "Alias Grace", new Date(2000, 1, 1)),
-//        new Book(3, "345678901", "The handmaids tale", new Date(2010, 1, 1))
-//    };
 }

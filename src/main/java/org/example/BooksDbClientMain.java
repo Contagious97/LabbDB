@@ -23,12 +23,11 @@ public class BooksDbClientMain extends Application {
         MockBooksDb booksDb = new MockBooksDb(); // model
         // Don't forget to connect to the db, somewhere...
 
-        BooksPane root = new BooksPane(booksDb);
+        BooksPane root = new BooksPane(primaryStage, booksDb);
 
         try {
             booksDb.connect("library");
             root.displayBooks(booksDb.getAllBooks());
-            System.out.println("Connected to database");
         } catch (Exception e){
             e.printStackTrace();
         }
