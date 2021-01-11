@@ -30,8 +30,7 @@ public class BooksDialog extends Dialog<Book> {
     public BooksDialog(BooksDbInterface dbInterface, Controller controller,Book book) {
         super();
 
-        System.out.println("Begining of book dialog");
-        //System.out.println(book.getAuthors().toString());
+
         authorList = new ArrayList<>();
 
         if(book == null){
@@ -61,13 +60,6 @@ public class BooksDialog extends Dialog<Book> {
         title.setPromptText("Title");
         TextField isbn = new TextField();
 
-//        Pattern pattern = Pattern.compile("[0-9]{0,13}");
-//        TextFormatter formatter = new TextFormatter((UnaryOperator<TextFormatter.Change>) change -> {
-//            return pattern.matcher(change.getControlNewText()).matches() ? change : null;
-//        });
-//
-//        isbn.setTextFormatter(formatter);
-
         isbn.setPromptText("ISBN");
 
         if (book != null){
@@ -82,7 +74,6 @@ public class BooksDialog extends Dialog<Book> {
             Optional<Author> result = dialog.showAndWait();
             result.ifPresent(author -> {
                 try {
-                    //book.addAuthors(authorList);
                     controller.onGetAllAuthors();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -143,11 +134,9 @@ public class BooksDialog extends Dialog<Book> {
         grid.add(published, 1, 5);
 
 
-        // Enable/Disable login button depending on whether a title was entered.
         Node confirmButton = this.getDialogPane().lookupButton(confirmButtonType);
         confirmButton.setDisable(true);
 
-        // Do some validation (using the Java 8 lambda syntax).
         if (book == null){
             title.textProperty().addListener((observable, oldValue, newValue) -> {
                 confirmButton.setDisable(newValue.trim().isEmpty());
@@ -158,10 +147,8 @@ public class BooksDialog extends Dialog<Book> {
 
         this.getDialogPane().setContent(grid);
 
-// Request focus on the title field by default.
         Platform.runLater(title::requestFocus);
 
-// Convert the result to a title-password-pair when the login button is clicked.
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
@@ -171,7 +158,6 @@ public class BooksDialog extends Dialog<Book> {
                     }
                     bookToAdd.addAuthors(authorList);
                     return bookToAdd;
-                //ska vi inte på något sätt kunna lägga till authors här?
             }
             return null;
         });

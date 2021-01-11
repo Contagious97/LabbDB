@@ -78,15 +78,8 @@ public class AuthorsDialog extends Dialog<Author> {
         Button deleteAuthorFromBookButton = new Button("Delete author from book");
 
         authorsFromBook = new ListView<>();
-        System.out.println("hello helolo");
-        if (book != null){
+        if (book != null) {
             authorsFromBook.getItems().addAll(book.getAuthors());
-//            if (book.getAuthors().size() != 0){
-//                for (Author a: book.getAuthors()){
-//                    authorsFromBook.getItems().add(a);
-//                    System.out.println(a.getAuthorID());
-//                }
-//            }
         }
 
         authorsFromBook.setMaxHeight(200);
@@ -137,12 +130,6 @@ public class AuthorsDialog extends Dialog<Author> {
         grid.add(arrowAuthorButton,2,4);
         grid.add(deleteAuthorFromBookButton,3,5);
         grid.add(authorsFromBook,3,4);
-        grid.add(new Label("List of  all authors:"), 2, 3);
-
-//
-//        Node confirmButton = this.getDialogPane().lookupButton(closeButtonType);
-//        Node addButton = this.getDialogPane().lookupButton(closeButtonType);
-////        confirmButton.setDisable(true);
 
 //
         addAuthorButton.setOnAction(event -> {
@@ -185,22 +172,15 @@ public class AuthorsDialog extends Dialog<Author> {
         });
 
         arrowAuthorButton.setOnAction(event -> {
-            System.out.println("arrow");
             selectedAuthor = authorsTable.getSelectionModel().selectedItemProperty().get();
             authorsFromBook.getItems().add(selectedAuthor);
         });
 
         this.getDialogPane().setContent(grid);
 
-// Request focus on the author field by default.
         Platform.runLater(addAuthorButton::requestFocus);
 
         this.setResultConverter(dialogButton -> {
-//            if ((dialogButton == closeButtonType) && author == null) {
-//                System.out.println("No author");
-////                return new Pair<String, String>(author.getText(), password.getText());
-//            }
-//            else{
             if (dialogButton == confirm){
                 try {
                     for (Author a: authorsToRemove){
@@ -216,7 +196,6 @@ public class AuthorsDialog extends Dialog<Author> {
                     }
                     authorsToAdd.clear();
                     authorsToAdd.addAll(authorsFromBook.getItems());
-                    System.out.println("Authors from book: " + authorsFromBook.getItems().toString() + "authorID: " + authorsFromBook.getItems().get(0).getAuthorID());
                 } catch (Exception e){
                     e.printStackTrace();
                 }
@@ -224,7 +203,6 @@ public class AuthorsDialog extends Dialog<Author> {
             }
             return null;
 
-//            }
         });
     }
 }

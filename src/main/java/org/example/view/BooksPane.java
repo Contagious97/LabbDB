@@ -1,5 +1,6 @@
 package org.example.view;
 
+import javafx.stage.Stage;
 import org.example.Controller;
 import org.example.model.BooksDbInterface;
 import javafx.scene.control.*;
@@ -30,17 +31,18 @@ public class BooksPane extends VBox {
 
     private TableView<Book> booksTable;
     private ObservableList<Book> booksInTable; // the data backing the table view
-    private Book bookToRemove;
     private ComboBox<SearchMode> searchModeBox;
     private TextField searchField;
     private Button searchButton;
     private BooksDbInterface dbInterface;
     private Book selectedBook;
+    private final Stage primaryStage;
 
     private MenuBar menuBar;
 
-    public BooksPane(BooksDbInterface booksDb) throws IOException, SQLException {
+    public BooksPane(Stage primaryStage, BooksDbInterface booksDb) throws IOException, SQLException {
         final Controller controller = new Controller(booksDb, this);
+        this.primaryStage = primaryStage;
         this.init(controller);
         this.dbInterface = booksDb;
         //displayBooks(booksTable.getItems());
@@ -54,7 +56,6 @@ public class BooksPane extends VBox {
      * @param books the books to display
      */
     public void displayBooks(List<Book> books) {
-        System.out.println(books.toString());
         booksInTable.clear();
         booksInTable.addAll(books);
     }
@@ -151,9 +152,16 @@ public class BooksPane extends VBox {
 
         Menu fileMenu = new Menu("File");
         MenuItem exitItem = new MenuItem("Exit");
-        MenuItem connectItem = new MenuItem("Connect to Db");
-        MenuItem disconnectItem = new MenuItem("Disconnect");
-        fileMenu.getItems().addAll(exitItem, connectItem, disconnectItem);
+
+        exitItem.setOnAction(actionEvent -> {
+            try {
+                controller.onDisconnect();
+                primaryStage.close();
+            } catch (SQLException e){
+            }
+        });
+
+        fileMenu.getItems().addAll(exitItem);
 
         Menu manageMenu = new Menu("Manage");
         MenuItem addItem = new MenuItem("Add Book");
