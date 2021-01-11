@@ -1,19 +1,17 @@
 package org.example.view;
 
-import javafx.scene.input.MouseEvent;
+import org.example.Controller;
 import org.example.model.BooksDbInterface;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.example.model.SearchMode;
 import org.example.model.Book;
-import org.example.model.MockBooksDb;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,7 +43,7 @@ public class BooksPane extends VBox {
         final Controller controller = new Controller(booksDb, this);
         this.init(controller);
         this.dbInterface = booksDb;
-        displayBooks(booksTable.getItems());
+        //displayBooks(booksTable.getItems());
 
     }
 
@@ -56,6 +54,7 @@ public class BooksPane extends VBox {
      * @param books the books to display
      */
     public void displayBooks(List<Book> books) {
+        System.out.println(books.toString());
         booksInTable.clear();
         booksInTable.addAll(books);
     }
@@ -165,10 +164,20 @@ public class BooksPane extends VBox {
                 showAlertAndWait("No book selected", Alert.AlertType.WARNING);
             }
             else {
-                BooksDialog dialog = new BooksDialog(dbInterface, controller, booksTable.getSelectionModel().getSelectedItem());
+                Book bookToModify = booksTable.getSelectionModel().getSelectedItem();
+                int index = booksInTable.indexOf(bookToModify);
+                BooksDialog dialog = new BooksDialog(dbInterface, controller, bookToModify);
                 Optional<Book> result = dialog.showAndWait();
                 result.ifPresent(book -> {
-                    controller.onModifyBook(book);
+                    try {
+                        System.out.println("modifieubnasd");
+                        controller.onModifyBook(bookToModify,book);
+                        booksInTable.remove(index);
+                        booksInTable.add(index,book);
+                        System.out.println(book.getAuthors().toString());
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                 });
             }
         });
@@ -181,6 +190,7 @@ public class BooksPane extends VBox {
                 controller.onAddBook(book);
                 booksInTable.add(0,book);
                 controller.onGetAllBooks();
+                System.out.println(book.getAuthors().get(0).getAuthorID());
             });
         });
 

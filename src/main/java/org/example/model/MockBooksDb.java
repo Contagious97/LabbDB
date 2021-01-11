@@ -35,7 +35,7 @@ public class MockBooksDb implements BooksDbInterface {
     public boolean connect(String database) throws IOException, SQLException {
         // mock implementation
 
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest2", "guest123");
+        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "labbguest", "guest123");
         System.out.println("Connected...");
 
         return true;
@@ -70,28 +70,52 @@ public class MockBooksDb implements BooksDbInterface {
     public List<Book> getBooksFromResultSet(ResultSet resultSet) throws IOException, SQLException{
 
         List<Book> result = new ArrayList<>();
-        Book bookToAdd;
+
+        Book bookToAdd = null;
+        boolean isNewBook = true;
+        int index = 0;
         while (resultSet.next()){
+
             String isbn = resultSet.getString("isbn");
+            System.out.println(isbn);
+
+            for (Book book: result){
+                if (book == null){
+                    index = 0;
+                    break;
+                }
+                if (book.getIsbn().equals(isbn)){
+                    isNewBook = false;
+                    index = result.indexOf(book);
+                    break;
+                }
+            }
+
+
             String title = resultSet.getString("title");
             Date date = resultSet.getDate("publishDate");
             int grade = resultSet.getInt("grade");
             String genre = resultSet.getString("genre");
-            bookToAdd = new Book(title,isbn,date, genre, grade);
-            if (!result.contains(bookToAdd)){
+            if (isNewBook){
+                bookToAdd = new Book(title,isbn,date, genre, grade);
                 result.add(bookToAdd);
+                index = result.indexOf(bookToAdd);
             }
 //            resultSet.getDate("birthday").toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-//            int authorID = resultSet.getInt("authorID");
+            int authorID = resultSet.getInt("authorID");
+            System.out.println(authorID);
 
             try {
-//                if (authorID != 0){
-                    bookToAdd.getAuthors().add(new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),resultSet.getString("lastName"),null));
-//                }
+                if (authorID != 0){
+                    Author author;
+                    author = new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),resultSet.getString("lastName"),resultSet.getDate("birthday"));
+                    result.get(index).addAuthorToBook(author);
+                }
             } catch (Exception e){
                 System.out.println("Error adding author");
             }
-
+            System.out.println(bookToAdd.toString());
+            isNewBook = true;
         }
         resultSet.close();
         return result;
@@ -178,6 +202,12 @@ public class MockBooksDb implements BooksDbInterface {
                             ")");
             connection.setAutoCommit(false);
             addBookStatement.executeUpdate();
+            for (Author author: bookToAdd.getAuthors()){
+                if (bookToAdd.getAuthors().size() != 0){
+                    addBookAuthors(bookToAdd.getIsbn(),author.getAuthorID()).executeUpdate();
+                    System.out.println(author.getAuthorID());
+                }
+            }
             connection.setAutoCommit(true);
         } catch (SQLException e) {
             if(connection!= null){
@@ -206,7 +236,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public void modifyBook(Book bookToModify) throws IOException, SQLException {
+    public void modifyBook(Book bookToModify, Book newBook) throws IOException, SQLException {
         try {
             PreparedStatement modifyBookStatement = connection.prepareStatement(
                     "UPDATE t_book SET title = ?, " +
@@ -215,17 +245,34 @@ public class MockBooksDb implements BooksDbInterface {
                     "genre = ? " +
                     "WHERE isbn = ?");
 
-            modifyBookStatement.setString(1,bookToModify.getTitle());
-            modifyBookStatement.setDate(2,bookToModify.getPublishDate());
-            modifyBookStatement.setInt(3,bookToModify.getGrade());
-            modifyBookStatement.setString(4,bookToModify.getGenre());
-            modifyBookStatement.setString(5,bookToModify.getIsbn());
+            modifyBookStatement.setString(1,newBook.getTitle());
+            modifyBookStatement.setDate(2,newBook.getPublishDate());
+            modifyBookStatement.setInt(3,newBook.getGrade());
+            modifyBookStatement.setString(4,newBook.getGenre());
+            modifyBookStatement.setString(5,newBook.getIsbn());
 
+            PreparedStatement deleteAuthors = connection.prepareStatement("DELETE FROM t_bookauthors WHERE isbn = ?");
+            deleteAuthors.setString(1,bookToModify.getIsbn());
             connection.setAutoCommit(false);
             modifyBookStatement.executeUpdate();
+            deleteAuthors.executeUpdate();
+            for (Author a: newBook.getAuthors()){
+                if (newBook.getAuthors().size() != 0){
+                    addBookAuthors(newBook.getIsbn(), a.getAuthorID()).executeUpdate();
+                }
+            }
             connection.setAutoCommit(true);
         } catch (Exception e){
+            if(connection!= null){
+                try {
+                    System.out.println("Transaction is being rolled back");
+                    connection.rollback();
+                } catch (SQLException u){
+                    System.out.println("Something went wrong when rolling back");
+                }
+            }
             e.printStackTrace();
+            throw e;
         }
 
     }
@@ -248,6 +295,37 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
+    public PreparedStatement addBookAuthors(String isbn, int authorID) throws IOException, SQLException {
+        String sql = "INSERT INTO t_bookauthors(isbn, authorID) VALUES(?,?)";
+
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1,isbn);
+        statement.setInt(2,authorID);
+        System.out.println(isbn + ": " + authorID);
+
+        return statement;
+    }
+
+    @Override
+    public int getLatestAuthorID(){
+        int latestAuthorID = 0;
+        try {
+            String sql = "SELECT authorID FROM t_author ORDER BY authorID DESC LIMIT 1";
+            Statement statement = connection.prepareStatement(sql);
+            statement.execute(sql);
+            ResultSet rs = statement.getResultSet();
+            while (rs.next()){
+                latestAuthorID = rs.getInt("authorID");
+            }
+            return latestAuthorID;
+        } catch (SQLException  e){
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    @Override
     public void addAuthor(Author author) throws IOException, SQLException {
         try {
             PreparedStatement addAuthorStatement = connection.prepareStatement(
@@ -260,6 +338,7 @@ public class MockBooksDb implements BooksDbInterface {
             connection.setAutoCommit(false);
             addAuthorStatement.executeUpdate();
             connection.setAutoCommit(true);
+
         } catch (SQLException e) {
             if(connection!= null){
                 try {
@@ -284,7 +363,7 @@ public class MockBooksDb implements BooksDbInterface {
         } catch (SQLException e) {
             if(connection!= null){
                 try {
-                    System.err.print("Transaction is being rolled back");
+                    System.out.print("Transaction is being rolled back");
                     connection.rollback();
                 } catch (SQLException u){
                     System.out.println("Something went wrong when rolling back");

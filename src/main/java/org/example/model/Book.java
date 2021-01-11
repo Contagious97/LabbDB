@@ -39,11 +39,32 @@ public class Book implements Comparable<Book>{
     
     public String getTitle() { return title; }
     public String getIsbn() { return isbn; }
+    public void setTitle(String title){
+        this.title = title;
+    }
+    public void setPublishDate(Date date){
+        this.publishDate = date;
+    }
+    public void setGenre(String genre){
+        this.genre = genre;
+    }
+    public void setGrade(int grade){
+        this.grade = grade;
+    }
     public Date getPublishDate() { return publishDate; }
     public String getGenre() { return genre; }
     public String getStoryLine() { return storyLine; }
     public int getGrade() { return grade; }
 
+    public void addAuthors(List<Author> authorsToAdd){
+        if (authorsToAdd != null){
+            authors.addAll(authorsToAdd);
+        }
+    }
+
+    public void removeAuthors(){
+        authors.clear();
+    }
 
     public void setStoryLine(String storyLine) {
         this.storyLine = storyLine;
@@ -51,6 +72,12 @@ public class Book implements Comparable<Book>{
 
     public List<Author> getAuthors(){
         return new ArrayList<>(authors);
+    }
+
+    public void removeAuthor(Author author){
+        if (authors.contains(author)){
+            authors.remove(author);
+        }
     }
 
     public void addAuthorToBook(Author newAuthor){

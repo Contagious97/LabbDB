@@ -1,7 +1,8 @@
-package org.example.view;
+package org.example;
 
 import javafx.application.Platform;
 import org.example.model.*;
+import org.example.view.BooksPane;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -26,7 +27,7 @@ public class Controller {
         this.booksView = booksView;
     }
 
-    protected void onSearchSelected(String searchFor, SearchMode mode) {
+    public void onSearchSelected(String searchFor, SearchMode mode) {
         new Thread(()->{
             try {
                 if (searchFor != null && searchFor.length() > 0) {
@@ -68,7 +69,7 @@ public class Controller {
 
     }
 
-    protected void onAddBook(Book bookToAdd){
+    public void onAddBook(Book bookToAdd){
         System.out.println(bookToAdd);
         new Thread(()->{
            try {
@@ -87,7 +88,7 @@ public class Controller {
         }).start();
     }
 
-    protected void onRemoveBook(Book bookToRemove){
+    public void onRemoveBook(Book bookToRemove){
         new Thread(()-> {
             try {
                 booksDb.removeBook(bookToRemove);
@@ -97,18 +98,30 @@ public class Controller {
         }).start();
     }
 
-    protected void onModifyBook(Book bookToModify){
+    public void onModifyBook(Book bookToModify, Book newBook){
         new Thread(()->{
             try {
-                booksDb.modifyBook(bookToModify);
+                booksDb.modifyBook(bookToModify, newBook);
             } catch (IOException | SQLException e){
                 e.printStackTrace();
-
             }
         }).start();
     }
 
-    protected void onGetAllBooks(){
+    public void onGetAllBooks(){
+        new Thread(()->{
+            System.out.println("getting all books");
+            try {
+                booksView.displayBooks(booksDb.getAllBooks());
+                //System.out.println(booksDb.getAllBooks().get(6).getAuthors().get(0).toString());
+            } catch (Exception e){
+                System.out.println("Error");
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void onGetAllAuthors(){
         new Thread(()->{
             try {
                 booksView.displayBooks(booksDb.getAllBooks());
@@ -119,29 +132,21 @@ public class Controller {
         }).start();
     }
 
-    protected void onGetAllAuthors(){
+    public void onAddAuthor(Author authorToAdd) throws SQLException,IOException{
         new Thread(()->{
             try {
-                booksView.displayBooks(booksDb.getAllBooks());
-            } catch (Exception e){
-                System.out.println("Error");
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    protected void onAddAuthor(Author authorToAdd) throws SQLException,IOException{
-        new Thread(()->{
-            try {
-                System.out.println(authorToAdd);
+                //System.out.println(authorToAdd);
                 booksDb.addAuthor(authorToAdd);
+                if (booksDb.getLatestAuthorID() != 0){
+                    authorToAdd.setAuthorID(booksDb.getLatestAuthorID());
+                }
             } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
-    protected void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
+    public void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
         new Thread(()->{
 
             try {

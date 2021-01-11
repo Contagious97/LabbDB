@@ -1,25 +1,23 @@
 package org.example.view;
 
-import com.mysql.cj.xdevapi.Result;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import org.example.Controller;
 import org.example.model.Author;
-import org.example.model.Book;
 import org.example.model.BooksDbInterface;
+import org.example.model.Book;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
@@ -28,10 +26,12 @@ public class AuthorsDialog extends Dialog<Author> {
     private final ObservableList<Author> authorsInTable;
     private List<Author> authorList;
     private Author selectedAuthor;
+    private List<Author> authorsToRemove;
     private ListView<Author> authorsFromBook;
+    private List<Author> authorsToAddToDB;
 
 
-    public AuthorsDialog(BooksDbInterface dbInterface, Controller controller) {
+    public AuthorsDialog(BooksDbInterface dbInterface, Controller controller, List<Author> authorsToAdd, Book book) {
         super();
 
         this.setTitle("Author Dialog");
@@ -40,6 +40,8 @@ public class AuthorsDialog extends Dialog<Author> {
         authorsTable = new TableView<>();
         authorsTable.setPrefWidth(300);
         authorsTable.setPrefHeight(200);
+        authorsToRemove = new ArrayList<>();
+        authorsToAddToDB = new ArrayList<>();
         try {
             authorList = dbInterface.getAllAuthors();
         } catch (SQLException | IOException e){
@@ -64,17 +66,28 @@ public class AuthorsDialog extends Dialog<Author> {
         authorsTable.getColumns().addAll(name,birthDay);
 
         ButtonType closeButtonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType confirm = new ButtonType("Confirm",ButtonBar.ButtonData.APPLY);
 
-        this.getDialogPane().getButtonTypes().addAll(closeButtonType);
+        this.getDialogPane().getButtonTypes().addAll(closeButtonType, confirm);
         authorsInTable = FXCollections.observableArrayList();
         authorsInTable.addAll(authorList);
         authorsTable.setItems(authorsInTable);
 
 
         Button arrowAuthorButton = new Button("-->");
+        Button deleteAuthorFromBookButton = new Button("Delete author from book");
 
         authorsFromBook = new ListView<>();
-
+        System.out.println("hello helolo");
+        if (book != null){
+            authorsFromBook.getItems().addAll(book.getAuthors());
+//            if (book.getAuthors().size() != 0){
+//                for (Author a: book.getAuthors()){
+//                    authorsFromBook.getItems().add(a);
+//                    System.out.println(a.getAuthorID());
+//                }
+//            }
+        }
 
         authorsFromBook.setMaxHeight(200);
         authorsFromBook.setPrefWidth(200);
@@ -122,6 +135,7 @@ public class AuthorsDialog extends Dialog<Author> {
         grid.add(deleteAuthorButton, 1, 5);
         grid.add(authorsTable,1,4);
         grid.add(arrowAuthorButton,2,4);
+        grid.add(deleteAuthorFromBookButton,3,5);
         grid.add(authorsFromBook,3,4);
         grid.add(new Label("List of  all authors:"), 2, 3);
 
@@ -133,12 +147,11 @@ public class AuthorsDialog extends Dialog<Author> {
 //
         addAuthorButton.setOnAction(event -> {
                 try {
-                    authorList.add(0,new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
-                    //controller.onAddAuthor(new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue())));
+                    Author author = new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue()));
+                    authorList.add(author);
+                    authorsToAddToDB.add(author);
                     authorsInTable.clear();
-                    for (Author author1: authorList){
-                        authorsInTable.add(author1);
-                    }
+                    authorsInTable.addAll(authorList);
                 } catch (Exception e ) {
 
                 }
@@ -146,14 +159,31 @@ public class AuthorsDialog extends Dialog<Author> {
 
 
         deleteAuthorButton.setOnAction(event -> {
-            selectedAuthor = authorsTable.getSelectionModel().getSelectedItem();
-            authorList.remove(selectedAuthor);
-            authorsInTable.clear();
-            authorsInTable.addAll(authorList);
-//            for (Author author1: authorList){
-//                authorsInTable.add(author1);
-//            }
+            try {
+                selectedAuthor = authorsTable.getSelectionModel().getSelectedItem();
+                authorList.remove(selectedAuthor);
+                authorsToRemove.add(selectedAuthor);
+                authorsInTable.clear();
+                authorsInTable.addAll(authorList);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+
         });
+
+        deleteAuthorFromBookButton.setOnAction(event ->{
+            try {
+                if(authorsFromBook.getSelectionModel().getSelectedItem() != null){
+                    authorsFromBook.getItems().remove(authorsFromBook.getSelectionModel().getSelectedItem());
+                }
+                else BooksPane.showAlertAndWait("No Author Chosen", Alert.AlertType.WARNING);
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        });
+
         arrowAuthorButton.setOnAction(event -> {
             System.out.println("arrow");
             selectedAuthor = authorsTable.getSelectionModel().selectedItemProperty().get();
@@ -171,7 +201,29 @@ public class AuthorsDialog extends Dialog<Author> {
 ////                return new Pair<String, String>(author.getText(), password.getText());
 //            }
 //            else{
+            if (dialogButton == confirm){
+                try {
+                    for (Author a: authorsToRemove){
+                        if (a != null){
+                            controller.onDeleteAuthor(a);
+                        }
+                    }
+
+                    for (Author a: authorsToAddToDB){
+                        if (a != null){
+                            controller.onAddAuthor(a);
+                        }
+                    }
+                    authorsToAdd.clear();
+                    authorsToAdd.addAll(authorsFromBook.getItems());
+                    System.out.println("Authors from book: " + authorsFromBook.getItems().toString() + "authorID: " + authorsFromBook.getItems().get(0).getAuthorID());
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
                 return authorsTable.getSelectionModel().selectedItemProperty().get();
+            }
+            return null;
+
 //            }
         });
     }

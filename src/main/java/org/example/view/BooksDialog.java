@@ -2,15 +2,11 @@ package org.example.view;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.util.Pair;
+import org.example.Controller;
 import org.example.model.*;
 
 import java.io.IOException;
@@ -20,18 +16,23 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
-import java.util.regex.Pattern;
 
 public class BooksDialog extends Dialog<Book> {
 
-    public BooksDialog(BooksDbInterface dbInterface,Controller controller) {
+    private Book bookToAdd;
+    private List<Author> authorList;
+
+    public BooksDialog(BooksDbInterface dbInterface, Controller controller) {
         this(dbInterface,controller,null);
 //        final Controller controller = new Controller(dbInterface, null);
     }
 
     public BooksDialog(BooksDbInterface dbInterface, Controller controller,Book book) {
         super();
+
+        System.out.println("Begining of book dialog");
+        //System.out.println(book.getAuthors().toString());
+        authorList = new ArrayList<>();
 
         if(book == null){
             this.setTitle("Add Books Dialog");
@@ -77,14 +78,14 @@ public class BooksDialog extends Dialog<Book> {
 
 
         assignAuthorButton.setOnAction(event -> {
-            AuthorsDialog dialog = new AuthorsDialog(dbInterface,controller);
+            AuthorsDialog dialog = new AuthorsDialog(dbInterface,controller,authorList,book);
             Optional<Author> result = dialog.showAndWait();
             result.ifPresent(author -> {
-
                 try {
-                    controller.onAddAuthor(author);
-                } catch (SQLException | IOException throwables) {
-                    throwables.printStackTrace();
+                    //book.addAuthors(authorList);
+                    controller.onGetAllAuthors();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         });
@@ -164,7 +165,12 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-                return new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());
+                    bookToAdd = new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());
+                    if (authorList.size() == 0 && book != null){
+                        authorList = book.getAuthors();
+                    }
+                    bookToAdd.addAuthors(authorList);
+                    return bookToAdd;
                 //ska vi inte på något sätt kunna lägga till authors här?
             }
             return null;
