@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A mock implementation of the BooksDBInterface interface to demonstrate how to
- * use it together with the user interface.
+ * An implementation of the BooksDBInterface interface to connect and
+ * use it together with the a database.
  *
  * Your implementation should access a real database.
  *
@@ -53,28 +53,30 @@ public class MockBooksDb implements BooksDbInterface {
     @Override
     public List<Book> searchBooksByTitle(String searchTitle) 
             throws IOException, SQLException  {
-        // mock implementation
-        // NB! Your implementation should select the books matching
-        // the search string via a query with to a database.
 
-        Statement statement = connection.createStatement();
+        Statement statement = null;
         String sql = "SELECT * FROM t_book " +
                 "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE UPPER(t_book.title) LIKE '%" + searchTitle.toUpperCase()+ "%'";
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
 
+        try {
+            statement = connection.createStatement();
 
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
+            return getBooksFromResultSet(resultSet);
+        } finally {
+            statement.close();
+        }
 
-        return getBooksFromResultSet(resultSet);
     }
     @Override
     public List<Book> getBooksFromResultSet(ResultSet resultSet) throws IOException, SQLException{
 
         List<Book> result = new ArrayList<>();
 
-        Book bookToAdd = null;
+        Book bookToAdd;
         boolean isNewBook = true;
         int index = 0;
         while (resultSet.next()){
@@ -93,7 +95,6 @@ public class MockBooksDb implements BooksDbInterface {
                 }
             }
 
-
             String title = resultSet.getString("title");
             Date date = resultSet.getDate("publishDate");
             int grade = resultSet.getInt("grade");
@@ -106,86 +107,106 @@ public class MockBooksDb implements BooksDbInterface {
 
             int authorID = resultSet.getInt("authorID");
 
-            try {
-                if (authorID != 0){
-                    Author author;
-                    author = new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),resultSet.getString("lastName"),resultSet.getDate("birthday"));
-                    result.get(index).addAuthorToBook(author);
-                }
-            } catch (Exception e){
-                System.out.println("Error adding author");
+
+            if (authorID != 0){
+                Author author;
+                author = new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),resultSet.getString("lastName"),resultSet.getDate("birthday"));
+                result.get(index).addAuthorToBook(author);
             }
             isNewBook = true;
         }
-        resultSet.close();
         return result;
     }
 
-
     @Override
     public List<Book> searchBooksByAuthor(String searchAuthorName) throws IOException, SQLException {
-        Statement statement = connection.createStatement();
+        Statement statement = null;
+
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE UPPER(CONCAT(t_author.firstName, ' ' ,t_author.lastName)) LIKE '%" + searchAuthorName.toUpperCase()+ "%'";
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
 
-
-
-        return getBooksFromResultSet(resultSet);
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
+            return getBooksFromResultSet(resultSet);
+        } finally {
+            statement.close();
+        }
     }
 
     @Override
     public List<Book> searchBooksByISBN(String searchIsbn) throws IOException, SQLException {
-        Statement statement = connection.createStatement();
+        Statement statement = null;
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE t_book.isbn LIKE '%" + searchIsbn + "%'";
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
-
-
-        return getBooksFromResultSet(resultSet);
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
+            return getBooksFromResultSet(resultSet);
+        } finally {
+            statement.close();
+        }
     }
 
     @Override
     public List<Book> searchBooksByRating(int searchRating) throws IOException, SQLException {
-        Statement statement = connection.createStatement();
+        Statement statement = null;
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE t_book.grade =" + searchRating;
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
 
-        return getBooksFromResultSet(resultSet);
+        try {
+            statement = connection.createStatement();
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
+
+            return getBooksFromResultSet(resultSet);
+        } finally {
+            if (statement != null){
+                statement.close();
+            }
+        }
     }
 
     @Override
     public List<Book> searchBooksByGenre(String searchGenre) throws IOException, SQLException {
-        Statement statement = connection.createStatement();
+        Statement statement = null;
         String sql = "SELECT * FROM t_book " +
                 "JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "JOIN t_author ON t_bookauthors.authorID = t_author.authorID " +
                 "WHERE t_book.genre LIKE '%" + searchGenre + "%'";
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
 
-        return getBooksFromResultSet(resultSet);
+        try {
+            statement = connection.createStatement();
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
+            return getBooksFromResultSet(resultSet);
+        } finally {
+            if (statement!= null){
+                statement.close();
+            }
+        }
     }
+
     @Override
     public List<Book> getAllBooks() throws IOException, SQLException{
         String sql = "SELECT * FROM t_book " +
                 "LEFT OUTER JOIN t_bookauthors ON t_book.isbn = t_bookauthors.isbn " +
                 "LEFT OUTER JOIN t_author ON t_bookauthors.authorID = t_author.authorID";
-        Statement statement = connection.prepareStatement(sql);
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
-
-        return getBooksFromResultSet(resultSet);
+        List<Book> books = new ArrayList<>();
+        try (Statement statement = connection.prepareStatement(sql)) {
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
+            books = getBooksFromResultSet(resultSet);
+            return books;
+        }
     }
 
     @Override
@@ -207,7 +228,7 @@ public class MockBooksDb implements BooksDbInterface {
                     addBookAuthors(bookToAdd.getIsbn(),author.getAuthorID()).executeUpdate();
                 }
             }
-            connection.setAutoCommit(true);
+            connection.commit();
         } catch (SQLException e) {
             if(connection!= null){
                 try {
@@ -218,20 +239,28 @@ public class MockBooksDb implements BooksDbInterface {
                 }
             }
             e.printStackTrace();
-            Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error adding the Book", Alert.AlertType.WARNING));
+            throw e;
+        }
+        finally {
+            connection.setAutoCommit(true);
         }
     }
 
     @Override
     public void removeBook(Book bookToRemove) throws IOException , SQLException{
         try {
-             PreparedStatement removeBookStatement = connection.prepareStatement("DELETE FROM t_book WHERE t_book.isbn = '"+bookToRemove.getIsbn()+"'");
+            PreparedStatement removeBookStatement = connection.prepareStatement("DELETE FROM t_book WHERE t_book.isbn = '"+bookToRemove.getIsbn()+"'");
             connection.setAutoCommit(false);
             removeBookStatement.executeUpdate();
-            connection.setAutoCommit(true);
+            connection.commit();
 
         } catch (SQLException u){
+            if (connection != null){
+                connection.rollback();
+            }
             throw u;
+        } finally {
+            connection.setAutoCommit(true);
         }
     }
 
@@ -261,7 +290,7 @@ public class MockBooksDb implements BooksDbInterface {
                     addBookAuthors(newBook.getIsbn(), a.getAuthorID()).executeUpdate();
                 }
             }
-            connection.setAutoCommit(true);
+            connection.commit();
         } catch (Exception e){
             if(connection!= null){
                 try {
@@ -273,25 +302,31 @@ public class MockBooksDb implements BooksDbInterface {
             }
             e.printStackTrace();
             throw e;
+        } finally {
+            connection.setAutoCommit(true);
         }
-
     }
 
     @Override
     public List<Author> getAllAuthors() throws IOException, SQLException {
         String sql = "SELECT * from t_author";
-        Statement statement = connection.prepareStatement(sql);
-        statement.execute(sql);
-        ResultSet resultSet = statement.getResultSet();
+        Statement statement = null;
 
-        List<Author> authorList = new ArrayList<>();
+        try {
+            statement = connection.prepareStatement(sql);
+            statement.execute(sql);
+            ResultSet resultSet = statement.getResultSet();
 
-        while (resultSet.next()){
-            authorList.add(new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),
-                    resultSet.getString("lastName"),resultSet.getDate("birthday")));
+            List<Author> authorList = new ArrayList<>();
+
+            while (resultSet.next()){
+                authorList.add(new Author(resultSet.getInt("authorID"),resultSet.getString("firstName"),
+                        resultSet.getString("lastName"),resultSet.getDate("birthday")));
+            }
+            return authorList;
+        } finally {
+            statement.close();
         }
-
-        return authorList;
     }
 
     @Override
@@ -308,71 +343,50 @@ public class MockBooksDb implements BooksDbInterface {
     @Override
     public int getLatestAuthorID() throws SQLException{
         int latestAuthorID = 0;
+        String sql = "SELECT authorID FROM t_author ORDER BY authorID DESC LIMIT 1";
+        Statement statement = null;
+
         try {
-            String sql = "SELECT authorID FROM t_author ORDER BY authorID DESC LIMIT 1";
-            Statement statement = connection.prepareStatement(sql);
+            statement = connection.prepareStatement(sql);
             statement.execute(sql);
             ResultSet rs = statement.getResultSet();
             while (rs.next()){
                 latestAuthorID = rs.getInt("authorID");
             }
             return latestAuthorID;
-        } catch (SQLException  e){
-            e.printStackTrace();
-            throw e;
+        } finally {
+            if (statement != null){
+                statement.close();
+            }
         }
-
     }
 
     @Override
     public void addAuthor(Author author) throws IOException, SQLException {
-        try {
-            PreparedStatement addAuthorStatement = connection.prepareStatement(
-                    "INSERT INTO t_author(firstName,lastName,birthday) " +
-                            "VALUES (" +
-                            "'"+author.getFirstName()+"',"+
-                            "'"+author.getLastName()+"'," +
-                            "'"+author.getBirthday()+"'" +
-                            ")");
-            connection.setAutoCommit(false);
-            addAuthorStatement.executeUpdate();
-            connection.setAutoCommit(true);
 
-        } catch (SQLException e) {
-            if(connection!= null){
-                try {
-                    System.err.print("Transaction is being rolled back");
-                    connection.rollback();
-                } catch (SQLException u){
-                    System.out.println("Something went wrong when rolling back");
-                }
-            }
-            e.printStackTrace();
-            throw e;
-        }
+        String sql = "INSERT INTO t_author(firstName,lastName,birthday) " +
+                "VALUES (" +
+                "'"+author.getFirstName()+"',"+
+                "'"+author.getLastName()+"'," +
+                "'"+author.getBirthday()+"'" +
+                ")";
+        PreparedStatement addAuthorStatement = connection.prepareStatement(sql);
+        addAuthorStatement.executeUpdate();
     }
 
     @Override
     public void deleteAuthor(Author authorToRemove) throws IOException, SQLException {
-        try {
-            PreparedStatement removeAuthorStatement = connection.prepareStatement("DELETE FROM t_author WHERE t_author.authorID = '"+authorToRemove.getAuthorID()+"'");
-            connection.setAutoCommit(false);
-            removeAuthorStatement.executeUpdate();
-            connection.setAutoCommit(true);
 
-        } catch (SQLException e) {
-            if(connection!= null){
-                try {
-                    System.out.print("Transaction is being rolled back");
-                    connection.rollback();
-                } catch (SQLException u){
-                    System.out.println("Something went wrong when rolling back");
-                }
+        Statement removeAuthorStatement = null;
+        String sql = "DELETE FROM t_author WHERE t_author.authorID = '"+authorToRemove.getAuthorID()+"'";
+        try {
+            removeAuthorStatement = connection.createStatement();
+            removeAuthorStatement.execute(sql);
+        } finally {
+            if (removeAuthorStatement != null){
+                removeAuthorStatement.close();
             }
-            e.printStackTrace();
-            throw e;
         }
     }
-
 
 }
