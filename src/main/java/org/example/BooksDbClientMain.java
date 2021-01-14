@@ -28,6 +28,7 @@ public class BooksDbClientMain extends Application {
         try {
             booksDb.connect("mongodb://localhost:27017");
             root.displayBooks(booksDb.getAllBooks());
+            System.out.println("Connected");
         } catch (Exception e){
             e.printStackTrace();
         }

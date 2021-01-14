@@ -1,5 +1,6 @@
 package org.example.view;
 
+import com.mongodb.MongoException;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,7 +46,7 @@ public class AuthorsDialog extends Dialog<Author> {
         authorsToAddToDB = new ArrayList<>();
         try {
             authorList = dbInterface.getAllAuthors();
-        } catch (SQLException | IOException e){
+        } catch (MongoException | IOException e){
             e.printStackTrace();
         }
 
@@ -150,7 +151,6 @@ public class AuthorsDialog extends Dialog<Author> {
                 }
             });
 
-
         deleteAuthorButton.setOnAction(event -> {
             try {
                 selectedAuthor = authorsTable.getSelectionModel().getSelectedItem();
@@ -177,7 +177,8 @@ public class AuthorsDialog extends Dialog<Author> {
 
         arrowAuthorButton.setOnAction(event -> {
             selectedAuthor = authorsTable.getSelectionModel().selectedItemProperty().get();
-            authorsFromBook.getItems().add(selectedAuthor);
+            if(!(authorsFromBook.getItems().contains(selectedAuthor)))
+                authorsFromBook.getItems().add(selectedAuthor);
         });
 
         this.getDialogPane().setContent(grid);
@@ -206,7 +207,6 @@ public class AuthorsDialog extends Dialog<Author> {
                 return authorsTable.getSelectionModel().selectedItemProperty().get();
             }
             return null;
-
         });
     }
 }

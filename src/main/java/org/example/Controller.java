@@ -1,5 +1,6 @@
 package org.example;
 
+import com.mongodb.MongoException;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import org.example.model.*;
@@ -81,7 +82,7 @@ public class Controller {
                else{
                     booksDb.addBook(bookToAdd);
                }
-
+                booksView.displayBooks(booksDb.getAllBooks());
            } catch (Exception e){
                Platform.runLater(()-> BooksPane.showAlertAndWait("Error adding book",WARNING));
                 e.printStackTrace();
@@ -93,7 +94,7 @@ public class Controller {
         new Thread(()-> {
             try {
                 booksDb.removeBook(bookToRemove);
-            } catch (IOException | SQLException e) {
+            } catch (IOException | MongoException e) {
                 Platform.runLater(()-> BooksPane.showAlertAndWait("Error removing book",WARNING));
                 e.printStackTrace();
             }
@@ -104,16 +105,16 @@ public class Controller {
         new Thread(()->{
             try {
                 booksDb.modifyBook(bookToModify, newBook);
-            } catch (IOException | SQLException e){
+            } catch (IOException | MongoException e){
                 Platform.runLater(()-> BooksPane.showAlertAndWait("Error modifying book",WARNING));;
             }
         }).start();
     }
 
-    public void onDisconnect() throws SQLException{
+    public void onDisconnect() throws MongoException{
         try {
             booksDb.disconnect();
-        } catch (SQLException | IOException e){
+        } catch (MongoException | IOException e){
             Platform.runLater(()->BooksPane.showAlertAndWait("Error disconnecting", WARNING));
         }
     }
@@ -142,25 +143,22 @@ public class Controller {
         }).start();
     }
 
-    public void onAddAuthor(Author authorToAdd) throws SQLException,IOException{
+    public void onAddAuthor(Author authorToAdd) {
         new Thread(()->{
             try {
                 booksDb.addAuthor(authorToAdd);
-                if (booksDb.getLatestAuthorID() != 0){
-                    authorToAdd.setAuthorID(booksDb.getLatestAuthorID());
-                }
-            } catch (IOException | SQLException e) {
+            } catch (IOException | MongoException e) {
                 Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error adding the author",WARNING));
                 e.printStackTrace();
             }
         }).start();
     }
 
-    public void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
+    public void onDeleteAuthor(Author authorToDelete) {
         new Thread(()->{
             try {
                 booksDb.deleteAuthor(authorToDelete);
-            } catch (IOException | SQLException e) {
+            } catch (IOException | MongoException e) {
                 Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error deleting the author",WARNING));
                 e.printStackTrace();
             }
