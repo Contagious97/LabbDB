@@ -1,5 +1,6 @@
 package org.example;
 
+import javafx.scene.control.Alert;
 import org.example.model.BooksDbInterface;
 import org.example.model.MockBooksDb;
 import org.example.view.BooksPane;
@@ -29,6 +30,7 @@ public class BooksDbClientMain extends Application {
             booksDb.connect("mongodb://localhost:27017");
             root.displayBooks(booksDb.getAllBooks());
         } catch (Exception e){
+            BooksPane.showAlertAndWait("ERRIOR", Alert.AlertType.WARNING);
             e.printStackTrace();
         }
         Scene scene = new Scene(root, 800, 600);

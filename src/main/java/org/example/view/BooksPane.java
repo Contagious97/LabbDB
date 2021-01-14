@@ -196,10 +196,10 @@ public class BooksPane extends VBox {
             Optional<Book> result = dialog.showAndWait();
             result.ifPresent(book -> {
                 controller.onAddBook(book);
-                booksInTable.add(0,book);
-                controller.onGetAllBooks();
+                //booksInTable.add(0,book);
 //                System.out.println(book.getAuthors().get(0).getAuthorID());
             });
+            //controller.onGetAllBooks();
         });
 
         MenuItem removeItem = new MenuItem("Remove");
@@ -209,14 +209,14 @@ public class BooksPane extends VBox {
         }));
 
         removeItem.setOnAction(event -> {
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to remove this book?");
-                    Optional<ButtonType> buttonChoice = alert.showAndWait();
-                    if(buttonChoice.get() == ButtonType.OK){
-                        System.out.println(selectedBook.getIsbn());
-                        System.out.println(selectedBook);
-                        controller.onRemoveBook(selectedBook);
-                        booksInTable.remove(selectedBook);
-                    }
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to remove this book?");
+            Optional<ButtonType> buttonChoice = alert.showAndWait();
+            if(buttonChoice.get() == ButtonType.OK){
+                System.out.println(selectedBook.getIsbn());
+                System.out.println(selectedBook);
+                controller.onRemoveBook(selectedBook);
+                booksInTable.remove(selectedBook);
+            }
         });
 
         MenuItem updateItem = new MenuItem("Update");

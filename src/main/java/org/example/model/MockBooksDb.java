@@ -6,6 +6,7 @@
 package org.example.model;
 
 
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
@@ -48,7 +49,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public boolean connect(String database) throws IOException, SQLException {
+    public boolean connect(String database) throws IOException, MongoException {
         // mock implementation
 //        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "momo", "password123");
         connection = MongoClients.create(database);
@@ -172,7 +173,7 @@ public class MockBooksDb implements BooksDbInterface {
 
     @Override
     public void modifyBook(Book book, Book newBook) throws IOException, SQLException {
-        
+
     }
 
     @Override

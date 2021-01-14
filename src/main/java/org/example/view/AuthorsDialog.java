@@ -177,7 +177,9 @@ public class AuthorsDialog extends Dialog<Author> {
 
         arrowAuthorButton.setOnAction(event -> {
             selectedAuthor = authorsTable.getSelectionModel().selectedItemProperty().get();
-            authorsFromBook.getItems().add(selectedAuthor);
+            if (!authorsFromBook.getItems().contains(selectedAuthor)){
+                authorsFromBook.getItems().add(selectedAuthor);
+            }
         });
 
         this.getDialogPane().setContent(grid);

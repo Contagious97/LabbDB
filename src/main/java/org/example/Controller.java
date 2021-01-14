@@ -81,6 +81,7 @@ public class Controller {
                else{
                     booksDb.addBook(bookToAdd);
                }
+               booksView.displayBooks(booksDb.getAllBooks());
 
            } catch (Exception e){
                Platform.runLater(()-> BooksPane.showAlertAndWait("Error adding book",WARNING));
@@ -146,15 +147,14 @@ public class Controller {
         new Thread(()->{
             try {
                 booksDb.addAuthor(authorToAdd);
-                if (booksDb.getLatestAuthorID() != 0){
-                    authorToAdd.setAuthorID(booksDb.getLatestAuthorID());
-                }
             } catch (IOException | SQLException e) {
                 Platform.runLater(()-> BooksPane.showAlertAndWait("There was an error adding the author",WARNING));
                 e.printStackTrace();
             }
         }).start();
     }
+
+
 
     public void onDeleteAuthor(Author authorToDelete) throws SQLException,IOException{
         new Thread(()->{

@@ -1,5 +1,7 @@
 package org.example.model;
 
+import com.mongodb.MongoException;
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,7 +24,7 @@ public interface BooksDbInterface {
      * @throws SQLException if there is a SQL error
      * @return true on successful connection.
      */
-    public boolean connect(String database) throws IOException, SQLException;
+    public boolean connect(String database) throws IOException, MongoException;
     /**
      * Disconnects from the database.
      * @throws SQLException if there is a SQL error
