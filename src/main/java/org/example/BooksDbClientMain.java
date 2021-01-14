@@ -26,7 +26,7 @@ public class BooksDbClientMain extends Application {
         BooksPane root = new BooksPane(primaryStage, booksDb);
 
         try {
-            booksDb.connect("library");
+            booksDb.connect("mongodb://localhost:27017");
             root.displayBooks(booksDb.getAllBooks());
         } catch (Exception e){
             e.printStackTrace();

@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import org.bson.types.ObjectId;
 import org.example.Controller;
 import org.example.model.Author;
 import org.example.model.BooksDbInterface;
@@ -70,7 +71,9 @@ public class AuthorsDialog extends Dialog<Author> {
 
         this.getDialogPane().getButtonTypes().addAll(closeButtonType, confirm);
         authorsInTable = FXCollections.observableArrayList();
+
         authorsInTable.addAll(authorList);
+
         authorsTable.setItems(authorsInTable);
 
 
@@ -134,11 +137,14 @@ public class AuthorsDialog extends Dialog<Author> {
 //
         addAuthorButton.setOnAction(event -> {
                 try {
-                    Author author = new Author(0,authorFN.getText(),authorLN.getText(),java.sql.Date.valueOf(birthday.getValue()));
-                    authorList.add(author);
-                    authorsToAddToDB.add(author);
-                    authorsInTable.clear();
-                    authorsInTable.addAll(authorList);
+                    if(!(authorFN.getText().isEmpty() || authorLN.getText().isEmpty())){
+                        Author author = new Author(new ObjectId(),authorFN.getText(),authorLN.getText(),birthday.getValue());
+                        authorList.add(author);
+                        authorsToAddToDB.add(author);
+                        authorsInTable.clear();
+                        authorsInTable.addAll(authorList);
+                    }
+                    else BooksPane.showAlertAndWait("Not sufficient information", Alert.AlertType.WARNING);
                 } catch (Exception e ) {
 
                 }
@@ -155,8 +161,6 @@ public class AuthorsDialog extends Dialog<Author> {
             } catch (Exception e){
                 e.printStackTrace();
             }
-
-
         });
 
         deleteAuthorFromBookButton.setOnAction(event ->{

@@ -1,6 +1,9 @@
 package org.example.model;
 
+import org.bson.types.ObjectId;
+
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,10 +13,10 @@ import java.util.List;
  * @author anderslm@kth.se
  */
 public class Book implements Comparable<Book>{
-
+    private ObjectId id;
     private String title;
     private String isbn; // should check format
-    private Date publishDate;
+    private LocalDate publishDate;
     private String genre;
     private String storyLine = "";
     private List<Author> authors;
@@ -22,7 +25,8 @@ public class Book implements Comparable<Book>{
     // Add authors, and corresponding methods, to your implementation 
     // as well, i.e. "private ArrayList<Author> authors;"
 
-    public Book(String title, String isbn, Date publishDate, String genre, String storyLine, int grade) {
+    public Book(ObjectId id, String isbn,String genre, int grade, LocalDate publishDate,String title) {
+        this.id = id;
         this.title = title;
         this.isbn = isbn;
         this.publishDate = publishDate;
@@ -33,16 +37,16 @@ public class Book implements Comparable<Book>{
         this.grade = grade;
     }
 
-    public Book(String title, String isbn, Date published, String genre, int grade) {
-        this(title, isbn, published, genre, "this is a book",grade);
-    }
+//    public Book(ObjectId id, String isbn,String genre, int grade, LocalDate published,String title ) {
+//        this(id,isbn,genre,grade,published,title);
+//    }
     
     public String getTitle() { return title; }
     public String getIsbn() { return isbn; }
     public void setTitle(String title){
         this.title = title;
     }
-    public void setPublishDate(Date date){
+    public void setPublishDate(LocalDate date){
         this.publishDate = date;
     }
     public void setGenre(String genre){
@@ -51,10 +55,13 @@ public class Book implements Comparable<Book>{
     public void setGrade(int grade){
         this.grade = grade;
     }
-    public Date getPublishDate() { return publishDate; }
+    public LocalDate getPublishDate() { return publishDate; }
     public String getGenre() { return genre; }
     public String getStoryLine() { return storyLine; }
     public int getGrade() { return grade; }
+    public ObjectId getId(){
+        return id;
+    }
 
     public void addAuthors(List<Author> authorsToAdd){
         if (authorsToAdd != null){

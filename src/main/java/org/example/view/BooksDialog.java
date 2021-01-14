@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import org.bson.types.ObjectId;
 import org.example.Controller;
 import org.example.model.*;
 
@@ -127,7 +128,7 @@ public class BooksDialog extends Dialog<Book> {
 
         DatePicker published = new DatePicker(LocalDate.now());
         if (book != null){
-            published.setValue(book.getPublishDate().toLocalDate());
+            published.setValue(book.getPublishDate());
         }
 
         grid.add(new Label("Published Date:"), 0, 5);
@@ -152,7 +153,7 @@ public class BooksDialog extends Dialog<Book> {
 
         this.setResultConverter(dialogButton -> {
             if (dialogButton == confirmButtonType) {
-                    bookToAdd = new Book(title.getText(),isbn.getText(),java.sql.Date.valueOf(published.getValue()),genreList.getValue().toString(), (Integer) ratingsList.getValue());
+                    bookToAdd = new Book(new ObjectId(),isbn.getText(),genreList.getValue().toString(),(Integer) ratingsList.getValue(),published.getValue(),title.getText());
                     if (authorList.size() == 0 && book != null){
                         authorList = book.getAuthors();
                     }

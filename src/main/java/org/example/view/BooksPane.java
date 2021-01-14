@@ -198,7 +198,7 @@ public class BooksPane extends VBox {
                 controller.onAddBook(book);
                 booksInTable.add(0,book);
                 controller.onGetAllBooks();
-                System.out.println(book.getAuthors().get(0).getAuthorID());
+//                System.out.println(book.getAuthors().get(0).getAuthorID());
             });
         });
 

@@ -41,20 +41,6 @@ public interface BooksDbInterface {
      */
     public List<Author> getAllAuthors() throws IOException,SQLException;
     /**
-     * Converts data from a resultSet to a complete list of books.
-     * @param resultSet the resultSet to fetch the data from
-     * @throws SQLException if there is a SQL error
-     * @return a list of books created from the resultSet.
-     */
-    public List<Book> getBooksFromResultSet(ResultSet resultSet) throws IOException, SQLException;
-    /**
-     * Adds entries to the relational table between authors and book.
-     * @param isbn the book's isbn.
-     * @param authorID the book's author's authorID
-     * @throws SQLException if there is a SQL error
-     */
-    public PreparedStatement addBookAuthors(String isbn, int authorID) throws IOException, SQLException;
-    /**
      * This function fetches all books that have the searched title.
      * @param title the title to search for.
      * @throws SQLException if there is a SQL error
@@ -89,12 +75,6 @@ public interface BooksDbInterface {
      * @return a list of books that matches the search.
      */
     public List<Book> searchBooksByGenre(String genre) throws IOException, SQLException;
-    /**
-     * Is used to connect the generated authorID from the database to the book's author's authorID.
-     * @throws SQLException if there is a SQL error
-     * @return the latest author's authorID
-     */
-    public int getLatestAuthorID() throws IOException, SQLException;
     /**
      * Adds a book to the database.
      * @param book the book to add

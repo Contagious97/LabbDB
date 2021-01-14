@@ -1,24 +1,29 @@
 package org.example.model;
+import org.bson.types.ObjectId;
+
 import java.sql.Date;
+import java.time.LocalDate;
 
 public class Author {
-    private int authorID;
+    private ObjectId authorID;
     private String firstName;
     private String lastName;
-    private Date birthday;
+    private LocalDate birthday;
 
-    public Author(int authorID,String firstName,String lastName, Date birthday) {
+    public Author(ObjectId authorID,String firstName,String lastName, LocalDate birthday) {
         this.authorID = authorID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthday = birthday;
     }
 
-    public int getAuthorID() {
+    public ObjectId getAuthorID() {
         return authorID;
     }
 
-    public void setAuthorID(int authorID) {this.authorID = authorID;}
+    public void setAuthorID(ObjectId authorID) {
+        this.authorID = authorID;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -29,7 +34,7 @@ public class Author {
     }
 
 
-    public Date getBirthday() {
+    public LocalDate getBirthday() {
         return birthday;
     }
 
