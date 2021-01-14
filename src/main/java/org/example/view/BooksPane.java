@@ -1,5 +1,6 @@
 package org.example.view;
 
+import com.mongodb.MongoException;
 import javafx.stage.Stage;
 import org.example.Controller;
 import org.example.model.BooksDbInterface;
@@ -157,7 +158,7 @@ public class BooksPane extends VBox {
             try {
                 controller.onDisconnect();
                 primaryStage.close();
-            } catch (SQLException e){
+            } catch (MongoException e){
             }
         });
 
@@ -178,7 +179,6 @@ public class BooksPane extends VBox {
                 Optional<Book> result = dialog.showAndWait();
                 result.ifPresent(book -> {
                     try {
-                        System.out.println("modifieubnasd");
                         controller.onModifyBook(bookToModify,book);
                         booksInTable.remove(index);
                         booksInTable.add(index,book);
@@ -190,16 +190,11 @@ public class BooksPane extends VBox {
             }
         });
 
-
         addItem.setOnAction(t -> {
             BooksDialog dialog = new BooksDialog(dbInterface,controller);
             Optional<Book> result = dialog.showAndWait();
-            result.ifPresent(book -> {
-                controller.onAddBook(book);
-                //booksInTable.add(0,book);
-//                System.out.println(book.getAuthors().get(0).getAuthorID());
-            });
-            //controller.onGetAllBooks();
+            result.ifPresent(controller::onAddBook);
+            controller.onGetAllBooks();
         });
 
         MenuItem removeItem = new MenuItem("Remove");
@@ -209,15 +204,14 @@ public class BooksPane extends VBox {
         }));
 
         removeItem.setOnAction(event -> {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to remove this book?");
-            Optional<ButtonType> buttonChoice = alert.showAndWait();
-            if(buttonChoice.get() == ButtonType.OK){
-                System.out.println(selectedBook.getIsbn());
-                System.out.println(selectedBook);
-                controller.onRemoveBook(selectedBook);
-                booksInTable.remove(selectedBook);
-            }
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to remove this book?");
+                    Optional<ButtonType> buttonChoice = alert.showAndWait();
+                    if(buttonChoice.get() == ButtonType.OK){
+                        booksInTable.remove(selectedBook);
+                    }
+            controller.onRemoveBook(selectedBook);
         });
+
 
         MenuItem updateItem = new MenuItem("Update");
 
@@ -234,9 +228,4 @@ public class BooksPane extends VBox {
         menuBar = new MenuBar();
         menuBar.getMenus().addAll(fileMenu, manageMenu);
     }
-
-//    public void handleCloseButtonAction(ActionEvent event) {
-//        Stage stage = (Stage) this.getScene().getWindow();
-//        stage.close();
-//    }
 }

@@ -6,25 +6,16 @@
 package org.example.model;
 
 
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.DatePicker;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.example.view.BooksPane;
 
-import java.io.IOException;
-import java.sql.*;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -44,12 +35,11 @@ public class MockBooksDb implements BooksDbInterface {
     private MongoCollection<Document> books;
     private MongoCollection<Document> authors;
 
-
     public MockBooksDb(){
     }
 
     @Override
-    public boolean connect(String database) throws IOException, MongoException {
+    public boolean connect(String database) {
         // mock implementation
 //        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + database +"?UseClientEnc=UTF8&serverTimezone=UTC", "momo", "password123");
         connection = MongoClients.create(database);
@@ -57,24 +47,22 @@ public class MockBooksDb implements BooksDbInterface {
         books = mongoDatabase.getCollection("t_book");
         authors = mongoDatabase.getCollection("t_author");
 
-        System.out.println("Connected...");
+        System.out.println("Connecting...");
 
         return true;
     }
 
     @Override
-    public void disconnect() throws IOException, SQLException {
+    public void disconnect() {
         // mock implementation
         connection.close();
     }
 
-
     @Override
-    public List<Book> getAllBooks() throws IOException, SQLException{
+    public List<Book> getAllBooks() {
         ArrayList<Book> booksList = new ArrayList<>();
 
         for(Document book:books.find()){
-            System.out.println(book.get("publishDate",""));
             LocalDate.parse(book.get("publishDate",""));
 
 
@@ -92,7 +80,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Author> getAllAuthors() throws IOException, SQLException {
+    public List<Author> getAllAuthors() {
         ArrayList<Author> authorsList = new ArrayList<>();
         for (Document author : authors.find()) {
             authorsList.add(new Author(author.get("_id",new ObjectId()),author.get("firstName", ""), author.get("lastName", ""),LocalDate.parse(author.get("birthday",""))));
@@ -102,7 +90,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByTitle(String title) throws IOException, SQLException {
+    public List<Book> searchBooksByTitle(String title) {
         List<Book> bookList = new ArrayList<>();
 
         var result = books.find(Filters.regex("title", Pattern.compile(title+"(?i)")));
@@ -114,7 +102,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByAuthor(String authorName) throws IOException, SQLException {
+    public List<Book> searchBooksByAuthor(String authorName) {
         List<Book> bookList = new ArrayList<>();
         var result = books.find(Filters.eq("firstName",authorName));
         for(var res:result)
@@ -125,7 +113,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByISBN(String isbn) throws IOException, SQLException {
+    public List<Book> searchBooksByISBN(String isbn) {
         List<Book> bookList = new ArrayList<>();
         var result = books.find(Filters.regex("isbn",Pattern.compile(isbn+"(?i)")));
         for(var res:result)
@@ -136,7 +124,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByRating(int rating) throws IOException, SQLException {
+    public List<Book> searchBooksByRating(int rating) {
         List<Book> bookList = new ArrayList<>();
         var result = books.find(Filters.eq("grade",rating));
         for(var res:result)
@@ -147,7 +135,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public List<Book> searchBooksByGenre(String genre) throws IOException, SQLException {
+    public List<Book> searchBooksByGenre(String genre) {
         List<Book> bookList = new ArrayList<>();
         var result = books.find(Filters.eq("genre",genre));
         for(var res:result)
@@ -158,7 +146,7 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public void addBook(Book book) throws IOException, SQLException {
+    public void addBook(Book book) {
         List<Document>arrayOfAuthors = new ArrayList<>();
         for(Author author:book.getAuthors()){
             arrayOfAuthors.add(new Document(Map.of("_id",author.getAuthorID(),"firstName",author.getFirstName(),"lastName",author.getLastName(),"birthday",author.getBirthday().toString())));
@@ -167,25 +155,22 @@ public class MockBooksDb implements BooksDbInterface {
     }
 
     @Override
-    public void removeBook(Book book) throws IOException, SQLException {
+    public void removeBook(Book book) {
         books.deleteOne(new Document("_id",book.getId()));
     }
 
     @Override
-    public void modifyBook(Book book, Book newBook) throws IOException, SQLException {
-
+    public void modifyBook(Book book, Book newBook) {
     }
 
     @Override
-    public void addAuthor(Author author) throws IOException, SQLException {
+    public void addAuthor(Author author) {
         var result = authors.insertOne(new Document(Map.of("firstName",author.getFirstName(),"lastName",author.getLastName(),"birthday",author.getBirthday().toString())));
         author.setAuthorID(result.getInsertedId().asObjectId().getValue());
     }
 
     @Override
-    public void deleteAuthor(Author author) throws IOException, SQLException {
+    public void deleteAuthor(Author author) {
         authors.deleteOne(new Document("_id",author.getAuthorID()));
     }
-
-
 }
